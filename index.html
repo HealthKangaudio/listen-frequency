@@ -115,8 +115,8 @@ height:240px;
 }
 
 #feedbackImg{
-max-width:180px;
-max-height:160px;
+max-width:320px;
+max-height:280px;
 width:auto;
 height:auto;
 display:none;
@@ -171,463 +171,409 @@ animation:pop 0.35s ease;
 </div>
 
 <script>
+let audioContext = null
+let masterGain = null
 
-let audioContext=null
-let masterGain=null
+const freq13 = [
+  63,80,100,125,160,200,250,315,
+  400,500,630,800,1000,1250,1600,
+  2000,2500,3150,4000,5000,6300,
+  8000,10000,12500,16000
+]
 
-const freq13=[
-63,80,100,125,160,200,250,315,
-400,500,630,800,1000,1250,1600,
-2000,2500,3150,4000,5000,6300,
-8000,10000,12500,16000]
+const freq23 = [
+  63,100,160,250,400,630,
+  1000,1600,2500,4000,6300,10000,16000
+]
 
-const freq23=[
-63,100,160,250,400,630,
-1000,1600,2500,4000,6300,10000,16000]
+const freqOct = [63,125,250,500,1000,2000,4000,8000,16000]
 
-const freqOct=[
-63,125,250,500,1000,2000,4000,8000,16000]
+let level = 3
+let activeFreqs = freq13
 
-let level=3
-let activeFreqs=freq13
+let mode = null
+let currentFrequency = null
+let boostAmount = 12
 
-let mode=null
-let currentFrequency=null
-let boostAmount=12
+let sourceNode = null
+let filterNode = null
 
-let sourceNode=null
-let filterNode=null
+let sineOsc = null
+let sineGain = null
 
-let sineOsc=null
-let sineGain=null
+let questionAnswered = false
+let totalQuestions = 0
+let correctAnswers = 0
 
-let questionAnswered=false
-
-const volumeSlider=document.getElementById("volumeSlider")
-const volumeValue=document.getElementById("volumeValue")
-const eqContainer=document.getElementById("eqContainer")
-const resultText=document.getElementById("result")
-const controlArea=document.getElementById("controlArea")
+const volumeSlider = document.getElementById("volumeSlider")
+const volumeValue = document.getElementById("volumeValue")
+const eqContainer = document.getElementById("eqContainer")
+const resultText = document.getElementById("result")
+const controlArea = document.getElementById("controlArea")
 const feedbackImg = document.getElementById("feedbackImg")
 
-volumeSlider.oninput=function(){
-
-volumeValue.innerText=this.value
-
-if(masterGain && audioContext){
-
-const now=audioContext.currentTime
-const target=this.value/10
-
-masterGain.gain.setTargetAtTime(target, now, 0.02)
-
-}
-
-}
-
-function createContext(){
-
-if(!audioContext){
-
-audioContext=new(window.AudioContext||window.webkitAudioContext)()
-
-masterGain=audioContext.createGain()
-
-const vol=volumeSlider.value/10
-masterGain.gain.setValueAtTime(vol,audioContext.currentTime)
-
-masterGain.connect(audioContext.destination)
-
-}
-
-}
-
-function stopAllAudio(){
-
-if(sineOsc){
-try{sineOsc.stop()}catch(e){}
-sineOsc=null
-}
-
-if(sourceNode){
-try{sourceNode.disconnect()}catch(e){}
-sourceNode=null
-}
-
-}
-
-function setLevel(l){
-
-level=l
-
-if(level===1) activeFreqs=freqOct
-if(level===2) activeFreqs=freq23
-if(level===3) activeFreqs=freq13
-
-correctAnswers=0
-totalQuestions=0
-updateScore()
-
-updateBandDisplay()
-updateLevelButtons()
-
-}
-
-function selectMode(m){
-
-stopAllAudio()
-
-mode=m
-resultText.innerText=""
-questionAnswered=false
-clearBands()
-
-correctAnswers=0
-totalQuestions=0
-updateScore()
-
-controlArea.innerHTML=""
-
-if(mode===1){
-
-controlArea.innerHTML=`
-<button onclick="newQuestion()">Next</button>
-<button onclick="replaySine()">Replay</button>
-`
-
-}else{
-
-controlArea.innerHTML=`
-<button onclick="newQuestion()">Next</button>
-<button onclick="stopAllAudio()">Stop</button>
-<button onclick="startPink()">Play</button>
-<button onclick="setEQ(false)">EQ OFF</button>
-<button onclick="setEQ(true)">EQ ON</button>
-`
-
-}
-
-updateModeButtons()
-
-}
-
-function newQuestion(){
-
-stopAllAudio()
-
-createContext()
-
-const now = audioContext.currentTime
-masterGain.gain.cancelScheduledValues(now)
-masterGain.gain.setValueAtTime(volumeSlider.value/10, now)
-
-feedbackImg.style.display="none"
-
-questionAnswered=false
-resultText.innerText=""
-clearBands()
-
-currentFrequency=activeFreqs[Math.floor(Math.random()*activeFreqs.length)]
-
-if(mode===1){
-playSine(currentFrequency)
-return
-}
-
-createContext()
-
-sourceNode=createPinkNoise(audioContext)
-
-filterNode=audioContext.createBiquadFilter()
-filterNode.type="peaking"
-filterNode.frequency.value=currentFrequency
-
-if(level===1) filterNode.Q.value=1.4
-if(level===2) filterNode.Q.value=2.1
-if(level===3) filterNode.Q.value=4.3
-
-if(mode===2) boostAmount=9
-if(mode===3) boostAmount=-9
-if(mode===4) boostAmount=Math.random()>0.5?9:-9
-
-filterNode.gain.value=boostAmount
-const compensation = -boostAmount/2
-masterGain.gain.setTargetAtTime(
- (volumeSlider.value/10) * Math.pow(10, compensation/20),
- now,
- 0.02
-)
-
-sourceNode.connect(filterNode)
-filterNode.connect(masterGain)
-
-}
-
-function startPink(){
-
-if(!currentFrequency) return
-
-stopAllAudio()
-
-createContext()
-
-sourceNode=createPinkNoise(audioContext)
-
-filterNode=audioContext.createBiquadFilter()
-filterNode.type="peaking"
-filterNode.frequency.value=currentFrequency
-
-if(level===1) filterNode.Q.value=1.4
-if(level===2) filterNode.Q.value=2.1
-if(level===3) filterNode.Q.value=4.3
-
-filterNode.gain.value=boostAmount
-const compensation = -boostAmount/2
-masterGain.gain.setTargetAtTime(
- (volumeSlider.value/10) * Math.pow(10, compensation/20),
- now,
- 0.02
-)
-
-sourceNode.connect(filterNode)
-filterNode.connect(masterGain)
-
-}
-
-function playSine(freq){
-
-createContext()
-
-const now=audioContext.currentTime
-
-// 이전 사인파 페이드아웃
-if(sineGain){
-
-sineGain.gain.cancelScheduledValues(now)
-sineGain.gain.setValueAtTime(sineGain.gain.value,now)
-sineGain.gain.linearRampToValueAtTime(0,now+0.05)
-
-if(sineOsc){
-sineOsc.stop(now+0.05)
-}
-
-}
-
-// 새 사인파 생성
-const osc=audioContext.createOscillator()
-const gain=audioContext.createGain()
-
-osc.type="sine"
-osc.frequency.value=freq
-
-osc.connect(gain)
-gain.connect(masterGain)
-
-gain.gain.setValueAtTime(0,now)
-gain.gain.linearRampToValueAtTime(0.3,now+0.01)
-
-osc.start(now)
-
-// 3초 후 자동 페이드
-gain.gain.setValueAtTime(0.3,now+2.95)
-gain.gain.linearRampToValueAtTime(0,now+3)
-
-osc.stop(now+3.05)
-
-sineOsc=osc
-sineGain=gain
-
-}
-
-function replaySine(){
-if(currentFrequency) playSine(currentFrequency)
-}
-
-function setEQ(state){
-if(!filterNode) return
-filterNode.gain.value=state?boostAmount:0
-}
-
-function createPinkNoise(ctx){
-
-const bufferSize=4096
-const pinkNoise=ctx.createScriptProcessor(bufferSize,1,1)
-
-let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0
-
-pinkNoise.onaudioprocess=function(e){
-
-const output=e.outputBuffer.getChannelData(0)
-
-for(let i=0;i<bufferSize;i++){
-
-const white=Math.random()*2-1
-
-b0=0.99886*b0+white*0.0555179
-b1=0.99332*b1+white*0.0750759
-b2=0.96900*b2+white*0.1538520
-b3=0.86650*b3+white*0.3104856
-b4=0.55000*b4+white*0.5329522
-b5=-0.7616*b5-white*0.0168980
-
-output[i]=(b0+b1+b2+b3+b4+b5+b6+white*0.5362)*0.07
-
-b6=white*0.115926
-
-}
-
-}
-
-return pinkNoise
-
-}
-
-function checkAnswer(freq,element){
-
-if(!mode) return
-
-// 항상 클릭한 주파수 소리 재생
-if(mode===1){
-  playSine(freq)
-}else{
-  if(audioContext){
-    filterNode.frequency.value=freq
-    setEQ(true)
+volumeSlider.oninput = function () {
+  volumeValue.innerText = this.value
+
+  if (masterGain && audioContext) {
+    const now = audioContext.currentTime
+    const target = this.value / 10
+    masterGain.gain.setTargetAtTime(target, now, 0.02)
   }
 }
 
-// 정답 판정은 최초 1회만
-if(!questionAnswered){
+function createContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    masterGain = audioContext.createGain()
 
-totalQuestions++
-
-clearBands()
-
-if(freq===currentFrequency){
-
-correctAnswers++
-
-element.classList.add("correct")
-resultText.innerText="Correct"
-
-feedbackImg.src="correct.png"
-feedbackImg.style.display="block"
-
-}else{
-
-element.classList.add("wrong")
-highlightCorrect()
-resultText.innerText="Wrong ("+currentFrequency+"Hz)"
-
-feedbackImg.src="wrong.png"
-feedbackImg.style.display="block"
-
+    const vol = volumeSlider.value / 10
+    masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
+    masterGain.connect(audioContext.destination)
+  }
 }
 
-questionAnswered=true
+function stopAllAudio() {
+  if (!audioContext) return
 
-updateScore()
+  const now = audioContext.currentTime
+  const fadeEnd = now + 0.03
 
+  if (sineGain) {
+    sineGain.gain.cancelScheduledValues(now)
+    sineGain.gain.setValueAtTime(sineGain.gain.value, now)
+    sineGain.gain.linearRampToValueAtTime(0, fadeEnd)
+  }
+
+  if (sineOsc) {
+    try { sineOsc.stop(fadeEnd + 0.01) } catch (e) {}
+  }
+
+  setTimeout(() => {
+    if (sineGain) {
+      try { sineGain.disconnect() } catch (e) {}
+      sineGain = null
+    }
+
+    if (sineOsc) {
+      sineOsc = null
+    }
+
+    if (filterNode) {
+      try { filterNode.disconnect() } catch (e) {}
+      filterNode = null
+    }
+
+    if (sourceNode) {
+      try { sourceNode.disconnect() } catch (e) {}
+      sourceNode = null
+    }
+  }, 60)
 }
 
+function setLevel(l) {
+  level = l
+
+  if (level === 1) activeFreqs = freqOct
+  if (level === 2) activeFreqs = freq23
+  if (level === 3) activeFreqs = freq13
+
+  correctAnswers = 0
+  totalQuestions = 0
+  updateScore()
+  updateBandDisplay()
+  updateLevelButtons()
 }
 
-function clearBands(){
-document.querySelectorAll(".eq-band").forEach(b=>{
-b.classList.remove("correct","wrong")
+function selectMode(m) {
+  stopAllAudio()
+
+  mode = m
+  resultText.innerText = ""
+  questionAnswered = false
+  clearBands()
+
+  correctAnswers = 0
+  totalQuestions = 0
+  updateScore()
+
+  controlArea.innerHTML = ""
+
+  if (mode === 1) {
+    controlArea.innerHTML = `
+      <button onclick="newQuestion()">Next</button>
+      <button onclick="replaySine()">Replay</button>
+    `
+  } else {
+    controlArea.innerHTML = `
+      <button onclick="newQuestion()">Next</button>
+      <button onclick="stopAllAudio()">Stop</button>
+      <button onclick="startPink()">Play</button>
+      <button onclick="setEQ(false)">EQ OFF</button>
+      <button onclick="setEQ(true)">EQ ON</button>
+    `
+  }
+
+  updateModeButtons()
+}
+
+function newQuestion() {
+  stopAllAudio()
+
+  setTimeout(() => {
+    createContext()
+
+    const now = audioContext.currentTime
+    masterGain.gain.cancelScheduledValues(now)
+    masterGain.gain.setValueAtTime(volumeSlider.value / 10, now)
+
+    feedbackImg.style.display = "none"
+    questionAnswered = false
+    resultText.innerText = ""
+    clearBands()
+
+    currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
+
+    if (mode === 1) {
+      playSine(currentFrequency)
+      return
+    }
+
+    sourceNode = createPinkNoise(audioContext)
+
+    filterNode = audioContext.createBiquadFilter()
+    filterNode.type = "peaking"
+    filterNode.frequency.value = currentFrequency
+
+    if (level === 1) filterNode.Q.value = 1.4
+    if (level === 2) filterNode.Q.value = 2.1
+    if (level === 3) filterNode.Q.value = 4.3
+
+    if (mode === 2) boostAmount = 9
+    if (mode === 3) boostAmount = -9
+    if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
+
+    filterNode.gain.value = boostAmount
+
+    const compensation = -boostAmount / 2
+    masterGain.gain.setTargetAtTime(
+      (volumeSlider.value / 10) * Math.pow(10, compensation / 20),
+      now,
+      0.02
+    )
+
+    sourceNode.connect(filterNode)
+    filterNode.connect(masterGain)
+  }, 60)
+}
+
+function startPink() {
+  if (!currentFrequency) return
+
+  stopAllAudio()
+
+  setTimeout(() => {
+    createContext()
+
+    const now = audioContext.currentTime
+
+    sourceNode = createPinkNoise(audioContext)
+
+    filterNode = audioContext.createBiquadFilter()
+    filterNode.type = "peaking"
+    filterNode.frequency.value = currentFrequency
+
+    if (level === 1) filterNode.Q.value = 1.4
+    if (level === 2) filterNode.Q.value = 2.1
+    if (level === 3) filterNode.Q.value = 4.3
+
+    filterNode.gain.value = boostAmount
+
+    const compensation = -boostAmount / 2
+    masterGain.gain.setTargetAtTime(
+      (volumeSlider.value / 10) * Math.pow(10, compensation / 20),
+      now,
+      0.02
+    )
+
+    sourceNode.connect(filterNode)
+    filterNode.connect(masterGain)
+  }, 60)
+}
+
+function playSine(freq) {
+  createContext()
+
+  const now = audioContext.currentTime
+  const osc = audioContext.createOscillator()
+  const gain = audioContext.createGain()
+
+  osc.type = "sine"
+  osc.frequency.value = freq
+
+  osc.connect(gain)
+  gain.connect(masterGain)
+
+  gain.gain.cancelScheduledValues(now)
+  gain.gain.setValueAtTime(0, now)
+  gain.gain.linearRampToValueAtTime(0.3, now + 0.02)
+  gain.gain.setValueAtTime(0.3, now + 2.98)
+  gain.gain.linearRampToValueAtTime(0, now + 3.00)
+
+  osc.start(now)
+  osc.stop(now + 3.03)
+
+  sineOsc = osc
+  sineGain = gain
+}
+
+function replaySine() {
+  stopAllAudio()
+
+  setTimeout(() => {
+    if (currentFrequency) playSine(currentFrequency)
+  }, 60)
+}
+
+function setEQ(state) {
+  if (!filterNode) return
+  filterNode.gain.value = state ? boostAmount : 0
+}
+
+function createPinkNoise(ctx) {
+  const bufferSize = 4096
+  const pinkNoise = ctx.createScriptProcessor(bufferSize, 1, 1)
+
+  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
+
+  pinkNoise.onaudioprocess = function (e) {
+    const output = e.outputBuffer.getChannelData(0)
+
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1
+
+      b0 = 0.99886 * b0 + white * 0.0555179
+      b1 = 0.99332 * b1 + white * 0.0750759
+      b2 = 0.96900 * b2 + white * 0.1538520
+      b3 = 0.86650 * b3 + white * 0.3104856
+      b4 = 0.55000 * b4 + white * 0.5329522
+      b5 = -0.7616 * b5 - white * 0.0168980
+
+      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.07
+      b6 = white * 0.115926
+    }
+  }
+
+  return pinkNoise
+}
+
+function checkAnswer(freq, element) {
+  if (!mode) return
+
+  if (mode === 1) {
+    stopAllAudio()
+    setTimeout(() => {
+      playSine(freq)
+    }, 60)
+  } else {
+    if (audioContext && filterNode) {
+      filterNode.frequency.value = freq
+      setEQ(true)
+    }
+  }
+
+  if (!questionAnswered) {
+    totalQuestions++
+    clearBands()
+
+    if (freq === currentFrequency) {
+      correctAnswers++
+      element.classList.add("correct")
+      resultText.innerText = "Correct"
+      feedbackImg.src = "correct.png"
+      feedbackImg.style.display = "block"
+    } else {
+      element.classList.add("wrong")
+      highlightCorrect()
+      resultText.innerText = "Wrong (" + currentFrequency + "Hz)"
+      feedbackImg.src = "wrong.png"
+      feedbackImg.style.display = "block"
+    }
+
+    questionAnswered = true
+    updateScore()
+  }
+}
+
+function clearBands() {
+  document.querySelectorAll(".eq-band").forEach(b => {
+    b.classList.remove("correct", "wrong")
+  })
+}
+
+function highlightCorrect() {
+  document.querySelectorAll(".eq-band").forEach(b => {
+    if (parseInt(b.dataset.freq) === currentFrequency) {
+      b.classList.add("correct")
+    }
+  })
+}
+
+function updateBandDisplay() {
+  document.querySelectorAll(".eq-band").forEach(b => {
+    const f = parseInt(b.dataset.freq)
+
+    if (activeFreqs.includes(f)) {
+      b.classList.remove("disabled")
+    } else {
+      b.classList.add("disabled")
+    }
+  })
+}
+
+function updateModeButtons() {
+  document.querySelectorAll(".mode-btn").forEach(btn => {
+    if (parseInt(btn.dataset.mode) === mode) {
+      btn.classList.remove("inactive")
+    } else {
+      btn.classList.add("inactive")
+    }
+  })
+}
+
+function updateLevelButtons() {
+  document.querySelectorAll(".level-btn").forEach(btn => {
+    if (parseInt(btn.dataset.level) === level) {
+      btn.classList.remove("inactive")
+    } else {
+      btn.classList.add("inactive")
+    }
+  })
+}
+
+freq13.forEach(freq => {
+  const band = document.createElement("div")
+  band.classList.add("eq-band")
+  band.dataset.freq = freq
+  band.innerText = freq >= 1000 ? (freq / 1000) + "k" : freq
+  band.onclick = () => checkAnswer(freq, band)
+  eqContainer.appendChild(band)
 })
+
+function updateScore() {
+  let percent = 0
+
+  if (totalQuestions > 0) {
+    percent = Math.round((correctAnswers / totalQuestions) * 100)
+  }
+
+  document.getElementById("score").innerText =
+    "Score: " + correctAnswers + " / " + totalQuestions + " (" + percent + "%)"
 }
-
-function highlightCorrect(){
-document.querySelectorAll(".eq-band").forEach(b=>{
-if(parseInt(b.dataset.freq)===currentFrequency){
-b.classList.add("correct")
-}
-})
-}
-
-function updateBandDisplay(){
-
-document.querySelectorAll(".eq-band").forEach(b=>{
-
-const f=parseInt(b.dataset.freq)
-
-if(activeFreqs.includes(f)){
-b.classList.remove("disabled")
-}else{
-b.classList.add("disabled")
-}
-
-})
-
-}
-
-freq13.forEach(freq=>{
-
-const band=document.createElement("div")
-
-band.classList.add("eq-band")
-
-band.dataset.freq=freq
-
-band.innerText=freq>=1000?(freq/1000)+"k":freq
-
-band.onclick=()=>checkAnswer(freq,band)
-
-eqContainer.appendChild(band)
-
-})
 
 updateBandDisplay()
-
-function updateModeButtons(){
-
-document.querySelectorAll(".mode-btn").forEach(btn=>{
-
-if(parseInt(btn.dataset.mode)===mode){
-btn.classList.remove("inactive")
-}else{
-btn.classList.add("inactive")
-}
-
-})
-
-}
-
-function updateLevelButtons(){
-
-document.querySelectorAll(".level-btn").forEach(btn=>{
-
-if(parseInt(btn.dataset.level)===level){
-btn.classList.remove("inactive")
-}else{
-btn.classList.add("inactive")
-}
-
-})
-
 updateModeButtons()
 updateLevelButtons()
-
-}
-
-let totalQuestions=0
-let correctAnswers=0
-
-function updateScore(){
-
-let percent=0
-
-if(totalQuestions>0){
-percent=Math.round((correctAnswers/totalQuestions)*100)
-}
-
-document.getElementById("score").innerText=
-"Score: "+correctAnswers+" / "+totalQuestions+" ("+percent+"%)"
-
-}
-
-updateBandDisplay()
 updateScore()
 </script>
 </body>
