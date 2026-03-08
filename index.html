@@ -355,12 +355,15 @@ function newQuestion() {
 
     filterNode.gain.value = boostAmount
 
-    const compensation = -boostAmount / 2
-    masterGain.gain.setTargetAtTime(
-      (volumeSlider.value / 10) * Math.pow(10, compensation / 20),
-      now,
-      0.02
-    )
+    const compensationDb = -Math.abs(boostAmount) / 2
+const compensatedVolume =
+  (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+
+masterGain.gain.setTargetAtTime(
+  compensatedVolume,
+  now,
+  0.02
+)
 
     sourceNode.connect(filterNode)
     filterNode.connect(masterGain)
@@ -389,12 +392,15 @@ function startPink() {
 
     filterNode.gain.value = boostAmount
 
-    const compensation = -boostAmount / 2
-    masterGain.gain.setTargetAtTime(
-      (volumeSlider.value / 10) * Math.pow(10, compensation / 20),
-      now,
-      0.02
-    )
+    const compensationDb = -Math.abs(boostAmount) / 2
+const compensatedVolume =
+  (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+
+masterGain.gain.setTargetAtTime(
+  compensatedVolume,
+  now,
+  0.02
+)
 
     sourceNode.connect(filterNode)
     filterNode.connect(masterGain)
