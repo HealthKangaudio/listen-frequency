@@ -249,7 +249,7 @@ try{sourceNode.stop()}catch(e){}
 sourceNode=null
 }
 
-if(audioContext && masterGain){
+}
 
 const now = audioContext.currentTime
 
@@ -361,6 +361,8 @@ masterGain.gain.setTargetAtTime(
 sourceNode.connect(filterNode)
 filterNode.connect(masterGain)
 
+sourceNode.connect(audioContext.destination)
+
 }
 
 function startPink(){
@@ -392,6 +394,7 @@ masterGain.gain.setTargetAtTime(
 
 sourceNode.connect(filterNode)
 filterNode.connect(masterGain)
+sourceNode.connect(audioContext.destination)
 
 }
 
