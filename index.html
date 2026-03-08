@@ -196,6 +196,8 @@ z-index:9999;
 let audioContext = null
 let masterGain = null
 
+let audioReady = false
+
 const freq13 = [
   63,80,100,125,160,200,250,315,
   400,500,630,800,1000,1250,1600,
@@ -256,24 +258,29 @@ function createContext() {
 }
 
 /* 🔊 모바일 오디오 언락 */
-async function unlockAudio() {
-
+async function initAudio() {
   createContext()
 
-  if (audioContext.state === "suspended") {
-    try {
+  try {
+    if (audioContext.state !== "running") {
       await audioContext.resume()
-    } catch (e) {
-      console.log("resume failed", e)
     }
+
+    // 아주 짧은 무음 신호로 출력 경로 깨우기
+    const buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate)
+    const source = audioContext.createBufferSource()
+    source.buffer = buffer
+    source.connect(masterGain)
+    source.start()
+
+    audioReady = (audioContext.state === "running")
+    console.log("audio state:", audioContext.state)
+  } catch (e) {
+    console.error("Audio init failed:", e)
+    audioReady = false
   }
 
-  // iOS / 모바일용 무음 버퍼
-  const buffer = audioContext.createBuffer(1, 1, 22050)
-  const source = audioContext.createBufferSource()
-  source.buffer = buffer
-  source.connect(masterGain)
-  source.start(0)
+  return audioReady
 }
 
 function stopAllAudio() {
@@ -328,9 +335,8 @@ function setLevel(l) {
   updateLevelButtons()
 }
 
-async function selectMode(m) {
-
-  await unlockAudio()
+function selectMode(m) {
+  if (!audioReady) return
 
   stopAllAudio()
 
@@ -363,8 +369,9 @@ async function selectMode(m) {
   updateModeButtons()
 }
 
-async function newQuestion() {
-  await unlockAudio()
+function newQuestion() {
+  if (!audioReady) return
+
   stopAllAudio()
 
   setTimeout(() => {
@@ -403,22 +410,18 @@ async function newQuestion() {
     filterNode.gain.value = boostAmount
 
     const compensationDb = getPinkCompensationDb()
-const compensatedVolume =
-  (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+    const compensatedVolume =
+      (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
-masterGain.gain.setTargetAtTime(
-  compensatedVolume,
-  now,
-  0.02
-)
+    masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
 
     sourceNode.connect(filterNode)
     filterNode.connect(masterGain)
   }, 60)
 }
 
-async function startPink() {
-  await unlockAudio()
+function startPink() {
+  if (!audioReady) return
   if (!currentFrequency) return
 
   stopAllAudio()
@@ -441,14 +444,10 @@ async function startPink() {
     filterNode.gain.value = boostAmount
 
     const compensationDb = getPinkCompensationDb()
-const compensatedVolume =
-  (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+    const compensatedVolume =
+      (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
-masterGain.gain.setTargetAtTime(
-  compensatedVolume,
-  now,
-  0.02
-)
+    masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
 
     sourceNode.connect(filterNode)
     filterNode.connect(masterGain)
@@ -481,8 +480,9 @@ function playSine(freq) {
   sineGain = gain
 }
 
-async function replaySine() {
-  await unlockAudio()
+function replaySine() {
+  if (!audioReady) return
+
   stopAllAudio()
 
   setTimeout(() => {
@@ -522,8 +522,8 @@ function createPinkNoise(ctx) {
   return pinkNoise
 }
 
-async function checkAnswer(freq, element) {
-  await unlockAudio()
+function checkAnswer(freq, element) {
+  if (!audioReady) return
   if (!mode) return
 
   if (mode === 1) {
@@ -636,20 +636,15 @@ const audioStartOverlay = document.getElementById("audioStartOverlay")
 const audioStartButton = document.getElementById("audioStartButton")
 
 audioStartButton.addEventListener("click", async () => {
-  await unlockAudio()
+  const ok = await initAudio()
 
-  if (audioContext && audioContext.state === "running") {
+  if (ok) {
     audioStartOverlay.style.display = "none"
   } else {
-    alert("오디오를 시작하지 못했습니다. 휴대폰 볼륨/무음모드와 브라우저 설정을 확인해 주세요.")
+    alert("오디오를 시작하지 못했습니다. 브라우저/기기 볼륨 설정을 확인해 주세요.")
   }
 })
 
-document.addEventListener("touchend", async () => {
-  if (!audioContext || audioContext.state !== "running") {
-    await unlockAudio()
-  }
-}, { passive: true })
 
 function getPinkCompensationDb() {
   if (mode === 2) return -1   // Pink Boost: Sine보다 -1dB
