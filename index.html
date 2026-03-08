@@ -271,7 +271,7 @@ async function initAudio() {
     const source = audioContext.createBufferSource()
     source.buffer = buffer
     source.connect(masterGain)
-    source.start()
+    source.start(0)
 
     audioReady = (audioContext.state === "running")
     console.log("audio state:", audioContext.state)
