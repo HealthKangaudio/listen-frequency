@@ -248,7 +248,9 @@ volumeSlider.oninput = function () {
 
 function createContext() {
   if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    audioContext = new (window.AudioContext || window.webkitAudioContext)({
+  sampleRate: 44100
+})
     masterGain = audioContext.createGain()
 
     const vol = volumeSlider.value / 10
@@ -266,12 +268,21 @@ async function initAudio() {
       await audioContext.resume()
     }
 
-    // 아주 짧은 무음 신호로 출력 경로 깨우기
-    const buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate)
-    const source = audioContext.createBufferSource()
-    source.buffer = buffer
-    source.connect(masterGain)
-    source.start()
+    // iPhone Safari 출력 경로 워밍업
+    const osc = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+
+    osc.type = "sine"
+    osc.frequency.value = 440
+
+    // 거의 안 들릴 정도로 아주 작게
+    gain.gain.setValueAtTime(0.0001, audioContext.currentTime)
+
+    osc.connect(gain)
+    gain.connect(masterGain)
+
+    osc.start(audioContext.currentTime)
+    osc.stop(audioContext.currentTime + 0.05)
 
     audioReady = (audioContext.state === "running")
     console.log("audio state:", audioContext.state)
@@ -635,15 +646,20 @@ updateScore()
 const audioStartOverlay = document.getElementById("audioStartOverlay")
 const audioStartButton = document.getElementById("audioStartButton")
 
-audioStartButton.addEventListener("click", async () => {
+async function handleAudioStart(e) {
+  e.preventDefault()
+
   const ok = await initAudio()
 
   if (ok) {
     audioStartOverlay.style.display = "none"
   } else {
-    alert("오디오를 시작하지 못했습니다. 브라우저/기기 볼륨 설정을 확인해 주세요.")
+    alert("오디오를 시작하지 못했습니다.")
   }
-})
+}
+
+audioStartButton.addEventListener("touchend", handleAudioStart, { passive: false })
+audioStartButton.addEventListener("click", handleAudioStart)
 
 
 function getPinkCompensationDb() {
