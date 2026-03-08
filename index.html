@@ -355,7 +355,7 @@ function newQuestion() {
 
     filterNode.gain.value = boostAmount
 
-    const compensationDb = -Math.abs(boostAmount) / 2
+    const compensationDb = getPinkCompensationDb()
 const compensatedVolume =
   (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
@@ -392,7 +392,7 @@ function startPink() {
 
     filterNode.gain.value = boostAmount
 
-    const compensationDb = -Math.abs(boostAmount) / 2
+    const compensationDb = getPinkCompensationDb()
 const compensatedVolume =
   (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
@@ -581,6 +581,16 @@ updateBandDisplay()
 updateModeButtons()
 updateLevelButtons()
 updateScore()
+
+function getPinkCompensationDb() {
+  if (mode === 2) return -1   // Pink Boost: Sine보다 -1dB
+  if (mode === 3) return 1    // Pink Cut: Sine보다 +1dB
+  if (mode === 4) {
+    if (boostAmount > 0) return -1
+    if (boostAmount < 0) return 1
+  }
+  return 0
+}
 </script>
 </body>
 </html>
