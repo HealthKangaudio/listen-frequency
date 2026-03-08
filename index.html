@@ -6,7 +6,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-
 .mode-btn.inactive,
 .level-btn.inactive{
 opacity:0.35;
@@ -111,7 +110,7 @@ margin-top:20px;
 display:flex;
 justify-content:center;
 align-items:center;
-height:240px;
+height:320px;
 }
 
 #feedbackImg{
@@ -127,7 +126,6 @@ animation:pop 0.35s ease;
 0%{transform:scale(0.7);opacity:0;}
 100%{transform:scale(1);opacity:1;}
 }
-
 </style>
 </head>
 
@@ -233,6 +231,18 @@ function createContext() {
   }
 }
 
+async function unlockAudio() {
+  createContext()
+
+  if (audioContext.state === "suspended") {
+    try {
+      await audioContext.resume()
+    } catch (e) {
+      console.error("Audio resume failed:", e)
+    }
+  }
+}
+
 function stopAllAudio() {
   if (!audioContext) return
 
@@ -285,7 +295,9 @@ function setLevel(l) {
   updateLevelButtons()
 }
 
-function selectMode(m) {
+async function selectMode(m) {
+  await unlockAudio()
+
   stopAllAudio()
 
   mode = m
@@ -317,7 +329,9 @@ function selectMode(m) {
   updateModeButtons()
 }
 
-function newQuestion() {
+async function newQuestion() {
+  await unlockAudio()
+
   stopAllAudio()
 
   setTimeout(() => {
@@ -356,21 +370,22 @@ function newQuestion() {
     filterNode.gain.value = boostAmount
 
     const compensationDb = getPinkCompensationDb()
-const compensatedVolume =
-  (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+    const compensatedVolume =
+      (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
-masterGain.gain.setTargetAtTime(
-  compensatedVolume,
-  now,
-  0.02
-)
+    masterGain.gain.setTargetAtTime(
+      compensatedVolume,
+      now,
+      0.02
+    )
 
     sourceNode.connect(filterNode)
     filterNode.connect(masterGain)
   }, 60)
 }
 
-function startPink() {
+async function startPink() {
+  await unlockAudio()
   if (!currentFrequency) return
 
   stopAllAudio()
@@ -393,14 +408,14 @@ function startPink() {
     filterNode.gain.value = boostAmount
 
     const compensationDb = getPinkCompensationDb()
-const compensatedVolume =
-  (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+    const compensatedVolume =
+      (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
-masterGain.gain.setTargetAtTime(
-  compensatedVolume,
-  now,
-  0.02
-)
+    masterGain.gain.setTargetAtTime(
+      compensatedVolume,
+      now,
+      0.02
+    )
 
     sourceNode.connect(filterNode)
     filterNode.connect(masterGain)
@@ -433,7 +448,9 @@ function playSine(freq) {
   sineGain = gain
 }
 
-function replaySine() {
+async function replaySine() {
+  await unlockAudio()
+
   stopAllAudio()
 
   setTimeout(() => {
@@ -473,7 +490,8 @@ function createPinkNoise(ctx) {
   return pinkNoise
 }
 
-function checkAnswer(freq, element) {
+async function checkAnswer(freq, element) {
+  await unlockAudio()
   if (!mode) return
 
   if (mode === 1) {
@@ -577,20 +595,20 @@ function updateScore() {
     "Score: " + correctAnswers + " / " + totalQuestions + " (" + percent + "%)"
 }
 
-updateBandDisplay()
-updateModeButtons()
-updateLevelButtons()
-updateScore()
-
 function getPinkCompensationDb() {
-  if (mode === 2) return -1   // Pink Boost: Sine보다 -1dB
-  if (mode === 3) return 1    // Pink Cut: Sine보다 +1dB
+  if (mode === 2) return -1
+  if (mode === 3) return 1
   if (mode === 4) {
     if (boostAmount > 0) return -1
     if (boostAmount < 0) return 1
   }
   return 0
 }
+
+updateBandDisplay()
+updateModeButtons()
+updateLevelButtons()
+updateScore()
 </script>
 </body>
 </html>
