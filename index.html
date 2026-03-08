@@ -244,19 +244,14 @@ masterGain.connect(audioContext.destination)
 
 function stopAllAudio(){
 
-if(audioContext && masterGain){
+if(sineOsc){
+try{sineOsc.stop()}catch(e){}
+sineOsc=null
+}
 
-const now = audioContext.currentTime
-
-masterGain.gain.cancelScheduledValues(now)
-masterGain.gain.setValueAtTime(masterGain.gain.value, now)
-masterGain.gain.linearRampToValueAtTime(0, now + 0.05)
-
-setTimeout(()=>{
-audioContext.close()
-audioContext=null
-},60)
-
+if(sourceNode){
+try{sourceNode.disconnect()}catch(e){}
+sourceNode=null
 }
 
 }
@@ -357,7 +352,6 @@ if(mode===4) boostAmount=Math.random()>0.5?9:-9
 
 filterNode.gain.value=boostAmount
 const compensation = -boostAmount/2
-const now = audioContext.currentTime
 masterGain.gain.setTargetAtTime(
  (volumeSlider.value/10) * Math.pow(10, compensation/20),
  now,
@@ -389,7 +383,6 @@ if(level===3) filterNode.Q.value=4.3
 
 filterNode.gain.value=boostAmount
 const compensation = -boostAmount/2
-const now = audioContext.currentTime
 masterGain.gain.setTargetAtTime(
  (volumeSlider.value/10) * Math.pow(10, compensation/20),
  now,
