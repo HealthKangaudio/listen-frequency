@@ -244,14 +244,19 @@ masterGain.connect(audioContext.destination)
 
 function stopAllAudio(){
 
-if(sineOsc){
-try{sineOsc.stop()}catch(e){}
-sineOsc=null
-}
+if(audioContext && masterGain){
 
-if(sourceNode){
-try{sourceNode.disconnect()}catch(e){}
-sourceNode=null
+const now = audioContext.currentTime
+
+masterGain.gain.cancelScheduledValues(now)
+masterGain.gain.setValueAtTime(masterGain.gain.value, now)
+masterGain.gain.linearRampToValueAtTime(0, now + 0.05)
+
+setTimeout(()=>{
+audioContext.close()
+audioContext=null
+},60)
+
 }
 
 }
