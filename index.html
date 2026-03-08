@@ -236,6 +236,8 @@ masterGain.gain.setValueAtTime(vol,audioContext.currentTime)
 
 masterGain.connect(audioContext.destination)
 
+}else if(audioContext.state==="suspended"){
+audioContext.resume()
 }
 
 }
@@ -249,11 +251,6 @@ const now = audioContext.currentTime
 masterGain.gain.cancelScheduledValues(now)
 masterGain.gain.setValueAtTime(masterGain.gain.value, now)
 masterGain.gain.linearRampToValueAtTime(0, now + 0.05)
-
-setTimeout(()=>{
-audioContext.close()
-audioContext=null
-},60)
 
 }
 
