@@ -666,6 +666,13 @@ const audioStartButton = document.getElementById("audioStartButton")
 
 async function handleAudioStart(e) {
   e.preventDefault()
+  e.stopPropagation()
+
+  audioStartButton.disabled = true
+  audioStartButton.textContent = "Starting..."
+
+  let mediaOk = false
+  let webAudioOk = false
 
   try {
     mediaPlayer.src = "audio/sine_wav/silence.wav"
@@ -673,20 +680,29 @@ async function handleAudioStart(e) {
     await mediaPlayer.play()
     mediaPlayer.pause()
     mediaPlayer.currentTime = 0
+    mediaOk = true
   } catch (err) {
     console.error("media warmup failed:", err)
   }
 
-  const ok = await initAudio()
-
-  if (ok || useMediaPlayback) {
-    audioStartOverlay.style.display = "none"
-  } else {
-    alert("오디오를 시작하지 못했습니다.")
+  try {
+    webAudioOk = await initAudio()
+  } catch (err) {
+    console.error("initAudio failed:", err)
   }
-}
 
-audioStartButton.addEventListener("click", handleAudioStart)
+  // iPhone이면 media playback 경로를 쓸 수 있으니 바로 통과
+  if (useMediaPlayback || mediaOk || webAudioOk) {
+    audioReady = true
+    audioStartOverlay.style.display = "none"
+    return
+  }
+
+  audioStartButton.disabled = false
+  audioStartButton.textContent = "Tap to Start Audio"
+  alert("오디오를 시작하지 못했습니다.")
+}
+audioStartButton.addEventListener("pointerup", handleAudioStart)
 
 function getPinkCompensationDb() {
   if (mode === 2) return -1   // Pink Boost: Sine보다 -1dB
