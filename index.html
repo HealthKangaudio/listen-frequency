@@ -193,16 +193,10 @@ z-index:9999;
 </div>
 
 <script>  
-  async function playPinkFile(freq, type) {
-  try {
-    mediaPlayer.pause()
-    mediaPlayer.currentTime = 0
-    mediaPlayer.src = `audio/pink/${type}/${freq}.wav`
-    mediaPlayer.volume = volumeSlider.value / 10
-    await mediaPlayer.play()
-  } catch (e) {
-    console.error("pink media playback failed:", e)
-  }
+
+  function setEQ(state) {
+  if (!filterNode) return
+  filterNode.gain.value = state ? boostAmount : 0
 }
   const mediaPlayer = document.getElementById("mediaPlayer")
 
@@ -396,21 +390,13 @@ function selectMode(m) {
       <button onclick="replaySine()">Replay</button>
     `
   } else {
-    if (useMediaPlayback) {
-      controlArea.innerHTML = `
-        <button onclick="newQuestion()">Next</button>
-        <button onclick="stopAllAudio()">Stop</button>
-        <button onclick="startPink()">Play</button>
-      `
-    } else {
-      controlArea.innerHTML = `
-        <button onclick="newQuestion()">Next</button>
-        <button onclick="stopAllAudio()">Stop</button>
-        <button onclick="startPink()">Play</button>
-        <button onclick="setEQ(false)">EQ OFF</button>
-        <button onclick="setEQ(true)">EQ ON</button>
-      `
-    }
+    controlArea.innerHTML = `
+      <button onclick="newQuestion()">Next</button>
+      <button onclick="stopAllAudio()">Stop</button>
+      <button onclick="startPink()">Play</button>
+      <button onclick="setEQ(false)">EQ OFF</button>
+      <button onclick="setEQ(true)">EQ ON</button>
+    `
   }
 
   updateModeButtons()
@@ -439,18 +425,6 @@ async function newQuestion() {
     return
   }
 
-  if (mode === 2) boostAmount = 9
-  if (mode === 3) boostAmount = -9
-  if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
-
-  // 아이폰이면 파일 재생
-  if (useMediaPlayback) {
-    const pinkType = boostAmount > 0 ? "boost" : "cut"
-    await playPinkFile(currentFrequency, pinkType)
-    return
-  }
-
-  // 아이폰이 아니면 기존 Web Audio 경로 유지
   sourceNode = createPinkNoise(audioContext)
 
   filterNode = audioContext.createBiquadFilter()
@@ -460,6 +434,10 @@ async function newQuestion() {
   if (level === 1) filterNode.Q.value = 1.4
   if (level === 2) filterNode.Q.value = 2.1
   if (level === 3) filterNode.Q.value = 4.3
+
+  if (mode === 2) boostAmount = 9
+  if (mode === 3) boostAmount = -9
+  if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
 
   filterNode.gain.value = boostAmount
 
@@ -474,16 +452,6 @@ async function newQuestion() {
 }
 async function startPink() {
   if (!currentFrequency) return
-
-  // 아이폰이면 파일 재생
-  if (useMediaPlayback) {
-    stopAllAudio()
-    const pinkType = boostAmount > 0 ? "boost" : "cut"
-    await playPinkFile(currentFrequency, pinkType)
-    return
-  }
-
-  // 아이폰이 아니면 기존 Web Audio 경로 유지
   if (!await ensureAudioRunning()) return
 
   stopAllAudio()
@@ -596,16 +564,10 @@ async function checkAnswer(freq, element) {
     stopAllAudio()
     await playSine(freq)
   } else {
-    if (useMediaPlayback) {
-      stopAllAudio()
-      const pinkType = boostAmount > 0 ? "boost" : "cut"
-      await playPinkFile(freq, pinkType)
-    } else {
-      if (!await ensureAudioRunning()) return
-      if (audioContext && filterNode) {
-        filterNode.frequency.value = freq
-        setEQ(true)
-      }
+    if (!await ensureAudioRunning()) return
+    if (audioContext && filterNode) {
+      filterNode.frequency.value = freq
+      setEQ(true)
     }
   }
 
