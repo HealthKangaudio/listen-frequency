@@ -643,38 +643,41 @@
     }
 
     async function playSine(freq) {
-      if (useMediaPlayback) {
-        try {
-          createContext()
-          await ensureAudioRunning()
+  if (!useMediaPlayback) return;
 
-          if (!mediaPlayer.paused && !mediaPlayer.ended) {
-            await fadeOutMediaPlayer(SINE_FADE_OUT)
-          } else if (mediaGain) {
-            const now = audioContext.currentTime
-            mediaGain.gain.cancelScheduledValues(now)
-            mediaGain.gain.setValueAtTime(0, now)
-          }
+  createContext();
+  await ensureAudioRunning();
 
-          mediaPlayer.src = `audio/sine_wav/${freq}.wav`
-          mediaPlayer.load()
+  const src = `audio/sine_wav/${freq}.wav`;
 
-          const now = audioContext.currentTime
-          mediaGain.gain.cancelScheduledValues(now)
-          mediaGain.gain.setValueAtTime(0, now)
+  if (mediaPlayer.src !== new URL(src, location.href).href) {
+    mediaPlayer.src = src;
+  }
 
-          mediaPlayer.volume = 1
-          await mediaPlayer.play()
+  const now = audioContext.currentTime;
+  mediaGain.gain.cancelScheduledValues(now);
+  mediaGain.gain.setValueAtTime(0, now);
 
-          const start = audioContext.currentTime
-          mediaGain.gain.cancelScheduledValues(start)
-          mediaGain.gain.setValueAtTime(0, start)
-          mediaGain.gain.linearRampToValueAtTime(1, start + SINE_FADE_IN)
-        } catch (e) {
-          console.error("media playback failed:", e)
-        }
-        return
+  await new Promise((resolve, reject) => {
+    const onReady = async () => {
+      mediaPlayer.removeEventListener("loadeddata", onReady);
+      try {
+        mediaPlayer.currentTime = 0;
+        await mediaPlayer.play();
+
+        const t = audioContext.currentTime;
+        mediaGain.gain.setValueAtTime(0, t);
+        mediaGain.gain.linearRampToValueAtTime(1, t + 0.05);
+        resolve();
+      } catch (e) {
+        reject(e);
       }
+    };
+
+    mediaPlayer.addEventListener("loadeddata", onReady, { once: true });
+    mediaPlayer.load();
+  });
+}
 
       createContext()
 
