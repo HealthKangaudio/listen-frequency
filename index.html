@@ -1,938 +1,915 @@
 <!DOCTYPE html>
 <head>
-<title>Listen Frequency</title>
+  <title>Listen Frequency</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
-<style>
+  <style>
+    .mode-btn.inactive,
+    .level-btn.inactive{
+      opacity:0.35;
+    }
 
-.mode-btn.inactive,
-.level-btn.inactive{
-opacity:0.35;
-}
+    body{
+      margin:0;
+      background:#dcefe5;
+      font-family:'Orbitron', sans-serif;
+      text-align:center;
+      color:#1b4332;
+    }
 
-body{
-margin:0;
-background:#dcefe5;
-font-family:'Orbitron', sans-serif;
-text-align:center;
-color:#1b4332;
-}
+    h1{
+      padding:25px;
+      font-weight:800;
+      font-size:42px;
+      letter-spacing:2px;
+      color:#1b4332;
+    }
 
-h1{
-padding:25px;
-font-weight:800;
-font-size:42px;
-letter-spacing:2px;
-color:#1b4332;
-}
+    .panel{
+      background:white;
+      margin:20px auto;
+      padding:20px;
+      width:98%;
+      max-width:1400px;
+      border-radius:16px;
+      box-shadow:0 8px 25px rgba(0,0,0,0.1);
+      box-sizing:border-box;
+    }
 
-.panel{
-background:white;
-margin:20px auto;
-padding:20px;
-width:98%;
-max-width:1400px;
-border-radius:16px;
-box-shadow:0 8px 25px rgba(0,0,0,0.1);
-box-sizing:border-box;
-}
+    button{
+      background:#2d6a4f;
+      color:white;
+      border:none;
+      padding:14px 20px;
+      margin:8px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:600;
+      min-height:48px;
+      min-width:88px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
 
-button{
-background:#2d6a4f;
-color:white;
-border:none;
-padding:14px 20px;
-margin:8px;
-border-radius:12px;
-cursor:pointer;
-font-size:16px;
-font-weight:600;
-min-height:48px;
-min-width:88px;
--webkit-tap-highlight-color: transparent;
-touch-action: manipulation;
-}
+    button:hover{
+      background:#1b4332;
+    }
 
-button:hover{
-background:#1b4332;
-}
+    .mode-btn{
+      background:#40916c;
+    }
 
-.mode-btn{
-background:#40916c;
-}
+    .level-btn{
+      background:#f77f00;
+    }
 
-.level-btn{
-background:#f77f00;
-}
+    .level-btn:hover{
+      background:#d62828;
+    }
 
-.level-btn:hover{
-background:#d62828;
-}
+    .eq-container{
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+      gap:8px;
+      margin:24px auto 0;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      overflow-y:hidden;
+      padding:8px 4px 14px;
+      box-sizing:border-box;
+      width:max-content;
+      max-width:100%;
+      scrollbar-gutter: stable;
+      scrollbar-width:auto;
+      scrollbar-color:#2d6a4f #d7e7de;
+    }
 
-.eq-container{
-display:flex;
-justify-content:center;
-align-items:flex-end;
-gap:8px;
-margin:24px auto 0;
-flex-wrap:nowrap;
-overflow-x:auto;
-overflow-y:hidden;
-padding:8px 4px 14px;
-box-sizing:border-box;
-width:max-content;
-max-width:100%;
-scrollbar-gutter: stable;
-scrollbar-width:auto;
-scrollbar-color:#2d6a4f #d7e7de;
-}
+    .eq-container::-webkit-scrollbar{
+      height:12px;
+    }
 
-.eq-container::-webkit-scrollbar{
-height:12px;
-}
+    .eq-container::-webkit-scrollbar-track{
+      background:#d7e7de;
+      border-radius:999px;
+    }
 
-.eq-container::-webkit-scrollbar-track{
-background:#d7e7de;
-border-radius:999px;
-}
+    .eq-container::-webkit-scrollbar-thumb{
+      background:#2d6a4f;
+      border-radius:999px;
+    }
 
-.eq-container::-webkit-scrollbar-thumb{
-background:#2d6a4f;
-border-radius:999px;
-}
+    .eq-container::-webkit-scrollbar-thumb:hover{
+      background:#1b4332;
+    }
+      
+    .eq-band{
+      width:42px;
+      height:180px;
+      background:linear-gradient(to top,#2d6a4f,#74c69d);
+      border-radius:12px;
+      cursor:pointer;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      font-size:11px;
+      padding-bottom:8px;
+      color:white;
+      font-family:Arial, sans-serif;
+      flex:0 0 auto;
+      box-sizing:border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
 
-.eq-container::-webkit-scrollbar-thumb:hover{
-background:#1b4332;
-}
-  
-.eq-band{
-width:42px;
-height:180px;
-background:linear-gradient(to top,#2d6a4f,#74c69d);
-border-radius:12px;
-cursor:pointer;
-display:flex;
-align-items:flex-end;
-justify-content:center;
-font-size:11px;
-padding-bottom:8px;
-color:white;
-font-family:Arial, sans-serif;
-flex:0 0 auto;
-box-sizing:border-box;
--webkit-tap-highlight-color: transparent;
-touch-action: manipulation;
-}
+    .eq-band.disabled{
+      opacity:0.25;
+      pointer-events:none;
+    }
 
-.eq-band.disabled{
-opacity:0.25;
-pointer-events:none;
-}
+    .correct{
+      background:linear-gradient(to top,#40916c,#2d6a4f)!important;
+    }
 
-.correct{
-background:linear-gradient(to top,#40916c,#2d6a4f)!important;
-}
+    .wrong{
+      background:linear-gradient(to top,#e63946,#b5172e)!important;
+    }
 
-.wrong{
-background:linear-gradient(to top,#e63946,#b5172e)!important;
-}
+    #result{
+      margin-top:25px;
+      font-size:18px;
+      font-weight:bold;
+    }
 
-#result{
-margin-top:25px;
-font-size:18px;
-font-weight:bold;
-}
+    #resultImage{
+      margin-top:20px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:240px;
+    }
 
-#resultImage{
-margin-top:20px;
-display:flex;
-justify-content:center;
-align-items:center;
-height:240px;
-}
+    #feedbackImg{
+      max-width:320px;
+      max-height:280px;
+      width:auto;
+      height:auto;
+      display:none;
+      animation:pop 0.35s ease;
+    }
 
-#feedbackImg{
-max-width:320px;
-max-height:280px;
-width:auto;
-height:auto;
-display:none;
-animation:pop 0.35s ease;
-}
+    @keyframes pop{
+      0%{transform:scale(0.7);opacity:0;}
+      100%{transform:scale(1);opacity:1;}
+    }
 
-@keyframes pop{
-0%{transform:scale(0.7);opacity:0;}
-100%{transform:scale(1);opacity:1;}
-}
-@media (max-width: 768px){
-  h1{
-    font-size:30px;
-    padding:18px;
-  }
+    @media (max-width: 768px){
+      h1{
+        font-size:30px;
+        padding:18px;
+      }
 
-  .panel{
-    width:94%;
-    padding:18px;
-    border-radius:14px;
-  }
+      .panel{
+        width:94%;
+        padding:18px;
+        border-radius:14px;
+      }
 
-  button{
-    width:calc(50% - 12px);
-    max-width:220px;
-    min-height:52px;
-    font-size:16px;
-    padding:14px 16px;
-    margin:6px;
-  }
+      button{
+        width:calc(50% - 12px);
+        max-width:220px;
+        min-height:52px;
+        font-size:16px;
+        padding:14px 16px;
+        margin:6px;
+      }
 
-  #controlArea button{
-    width:calc(50% - 12px);
-  }
+      #controlArea button{
+        width:calc(50% - 12px);
+      }
 
-  .mode-btn,
-  .level-btn{
-    width:calc(50% - 12px);
-  }
+      .mode-btn,
+      .level-btn{
+        width:calc(50% - 12px);
+      }
 
-  .eq-container{
-    justify-content:flex-start;
-    width:100%;
-    max-width:100%;
-    gap:8px;
-    margin-top:22px;
-    overflow-x:scroll;
-  }
+      .eq-container{
+        justify-content:flex-start;
+        width:100%;
+        max-width:100%;
+        gap:8px;
+        margin-top:22px;
+        overflow-x:scroll;
+      }
 
-  .eq-band{
-    width:38px;
-    height:140px;
-    font-size:11px;
-    border-radius:10px;
-  }
+      .eq-band{
+        width:38px;
+        height:140px;
+        font-size:11px;
+        border-radius:10px;
+      }
 
-  #result{
-    font-size:20px;
-  }
+      #result{
+        font-size:20px;
+      }
 
-  #feedbackImg{
-    max-width:260px;
-    max-height:220px;
-  }
-}
-  
-</style>
+      #feedbackImg{
+        max-width:260px;
+        max-height:220px;
+      }
+    }
+  </style>
 </head>
 
 <body>
   <audio id="mediaPlayer" playsinline preload="auto"></audio>
 
   <div id="audioStartOverlay" style="
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.75);
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:9999;
-">
-  <button id="audioStartButton" style="
-  font-size:24px;
-  padding:20px 30px;
-  border-radius:16px;
-  border:none;
-  background:#2d6a4f;
-  color:white;
-  font-family:'Orbitron', sans-serif;
-  min-height:56px;
-  min-width:220px;
-">
-    Tap to Start Audio
-  </button>
-</div>
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.75);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    touch-action:manipulation;
+  ">
+    <button id="audioStartButton" type="button" style="
+      font-size:24px;
+      padding:20px 30px;
+      border-radius:16px;
+      border:none;
+      background:#2d6a4f;
+      color:white;
+      font-family:'Orbitron', sans-serif;
+      min-height:56px;
+      min-width:220px;
+      touch-action:manipulation;
+    ">
+      Tap to Start Audio
+    </button>
+  </div>
 
-<h1>Listen Frequency</h1>
+  <h1>Listen Frequency</h1>
 
-<div class="panel">
+  <div class="panel">
 
-<h3>🎛 Mode</h3>
+    <h3>🎛 Mode</h3>
 
-<button class="mode-btn" data-mode="1" onclick="selectMode(1)">1. Sine Wave</button>
-<button class="mode-btn" data-mode="2" onclick="selectMode(2)">2. Pink Boost</button>
-<button class="mode-btn" data-mode="3" onclick="selectMode(3)">3. Pink Cut</button>
-<button class="mode-btn" data-mode="4" onclick="selectMode(4)">4. Pink Random</button>
+    <button class="mode-btn" data-mode="1" onclick="selectMode(1)">1. Sine Wave</button>
+    <button class="mode-btn" data-mode="2" onclick="selectMode(2)">2. Pink Boost</button>
+    <button class="mode-btn" data-mode="3" onclick="selectMode(3)">3. Pink Cut</button>
+    <button class="mode-btn" data-mode="4" onclick="selectMode(4)">4. Pink Random</button>
 
-<h3>🎚 Level</h3>
+    <h3>🎚 Level</h3>
 
-<button class="level-btn" data-level="1" onclick="setLevel(1)">Level.1 1 Octave</button>
-<button class="level-btn" data-level="2" onclick="setLevel(2)">Level.2 2/3 Octave</button>
-<button class="level-btn" data-level="3" onclick="setLevel(3)">Level.3 1/3 Octave</button>
+    <button class="level-btn" data-level="1" onclick="setLevel(1)">Level.1 1 Octave</button>
+    <button class="level-btn" data-level="2" onclick="setLevel(2)">Level.2 2/3 Octave</button>
+    <button class="level-btn" data-level="3" onclick="setLevel(3)">Level.3 1/3 Octave</button>
 
-<hr style="margin:30px 0">
+    <hr style="margin:30px 0">
 
-<div id="controlArea"></div>
+    <div id="controlArea"></div>
 
-<br>
+    <br>
 
-🔊 Volume
-<input type="range" id="volumeSlider" min="0" max="10" step="1" value="5">
-<span id="volumeValue">5</span>
+    🔊 Volume
+    <input type="range" id="volumeSlider" min="0" max="10" step="1" value="5">
+    <span id="volumeValue">5</span>
 
-<div class="eq-container" id="eqContainer"></div>
-<div id="result"></div>
-<div id="score"></div>
+    <div class="eq-container" id="eqContainer"></div>
+    <div id="result"></div>
+    <div id="score"></div>
 
-<div id="resultImage">
-<img id="feedbackImg" src="">
-</div>
+    <div id="resultImage">
+      <img id="feedbackImg" src="">
+    </div>
+  </div>
 
-</div>
+  <script>
+    const mediaPlayer = document.getElementById("mediaPlayer")
+    const volumeSlider = document.getElementById("volumeSlider")
+    const volumeValue = document.getElementById("volumeValue")
+    const eqContainer = document.getElementById("eqContainer")
+    const resultText = document.getElementById("result")
+    const controlArea = document.getElementById("controlArea")
+    const feedbackImg = document.getElementById("feedbackImg")
+    const audioStartOverlay = document.getElementById("audioStartOverlay")
+    const audioStartButton = document.getElementById("audioStartButton")
 
-<script>  
-  let mediaSourceNode = null
-let mediaGain = null
+    let audioContext = null
+    let masterGain = null
+    let mediaSourceNode = null
+    let mediaGain = null
 
-const SINE_FADE_IN = 0.05
-const SINE_FADE_OUT = 0.05
+    let audioReady = false
 
-  function setEQ(state) {
-  if (!filterNode) return
-  filterNode.gain.value = state ? boostAmount : 0
-}
-  const mediaPlayer = document.getElementById("mediaPlayer")
+    const SINE_FADE_IN = 0.05
+    const SINE_FADE_OUT = 0.05
 
-function isIPhone() {
-  return /iPhone/i.test(navigator.userAgent)
-}
+    const freq13 = [
+      63,80,100,125,160,200,250,315,
+      400,500,630,800,1000,1250,1600,
+      2000,2500,3150,4000,5000,6300,
+      8000,10000,12500,16000
+    ]
 
-let useMediaPlayback = isIPhone()
+    const freq23 = [
+      63,100,160,250,400,630,
+      1000,1600,2500,4000,6300,10000,16000
+    ]
 
-  async function playSineFile(freq) {
-  try {
-    mediaPlayer.pause()
-    mediaPlayer.currentTime = 0
-    mediaPlayer.src = `audio/sine_wav/${freq}.wav`
-    mediaPlayer.volume = volumeSlider.value / 10
-    await mediaPlayer.play()
-  } catch (e) {
-    console.error("media playback failed:", e)
-  }
-}
-let audioContext = null
-let masterGain = null
+    const freqOct = [63,125,250,500,1000,2000,4000,8000,16000]
 
-let audioReady = false
+    let level = 3
+    let activeFreqs = freq13
 
-const freq13 = [
-  63,80,100,125,160,200,250,315,
-  400,500,630,800,1000,1250,1600,
-  2000,2500,3150,4000,5000,6300,
-  8000,10000,12500,16000
-]
+    let mode = null
+    let currentFrequency = null
+    let boostAmount = 12
 
-const freq23 = [
-  63,100,160,250,400,630,
-  1000,1600,2500,4000,6300,10000,16000
-]
+    let sourceNode = null
+    let filterNode = null
 
-const freqOct = [63,125,250,500,1000,2000,4000,8000,16000]
+    let sineOsc = null
+    let sineGain = null
 
-let level = 3
-let activeFreqs = freq13
+    let questionAnswered = false
+    let totalQuestions = 0
+    let correctAnswers = 0
 
-let mode = null
-let currentFrequency = null
-let boostAmount = 12
+    function isIPhone() {
+      return /iPhone/i.test(navigator.userAgent)
+    }
 
-let sourceNode = null
-let filterNode = null
+    let useMediaPlayback = isIPhone()
 
-let sineOsc = null
-let sineGain = null
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
 
-let questionAnswered = false
-let totalQuestions = 0
-let correctAnswers = 0
+    function createContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        masterGain = audioContext.createGain()
 
-const volumeSlider = document.getElementById("volumeSlider")
-const volumeValue = document.getElementById("volumeValue")
-const eqContainer = document.getElementById("eqContainer")
-const resultText = document.getElementById("result")
-const controlArea = document.getElementById("controlArea")
-const feedbackImg = document.getElementById("feedbackImg")
+        const vol = volumeSlider.value / 10
+        masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
+        masterGain.connect(audioContext.destination)
 
-volumeSlider.oninput = function () {
-  volumeValue.innerText = this.value
+        mediaGain = audioContext.createGain()
+        mediaGain.gain.setValueAtTime(1, audioContext.currentTime)
 
-  if (masterGain && audioContext) {
-    const now = audioContext.currentTime
-    const target = this.value / 10
-    masterGain.gain.setTargetAtTime(target, now, 0.02)
-  }
+        mediaSourceNode = audioContext.createMediaElementSource(mediaPlayer)
+        mediaSourceNode.connect(mediaGain)
+        mediaGain.connect(masterGain)
+      }
+    }
 
-  mediaPlayer.volume = this.value / 10
-}
-  async function fadeOutMediaPlayer(duration = SINE_FADE_OUT) {
-  createContext()
-  await ensureAudioRunning()
+    async function ensureAudioRunning() {
+      createContext()
 
-  if (!mediaGain) return
+      try {
+        if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
+          await audioContext.resume()
+        }
+      } catch (e) {
+        console.error("Audio resume failed:", e)
+      }
 
-  const now = audioContext.currentTime
-  const current = mediaGain.gain.value
+      audioReady = !!(audioContext && audioContext.state === "running")
+      console.log("audio state:", audioContext ? audioContext.state : "no context")
 
-  mediaGain.gain.cancelScheduledValues(now)
-  mediaGain.gain.setValueAtTime(current, now)
-  mediaGain.gain.linearRampToValueAtTime(0, now + duration)
+      return audioReady
+    }
 
-  await sleep(duration * 1000)
+    async function initAudio() {
+      createContext()
 
-  mediaPlayer.pause()
-  mediaPlayer.currentTime = 0
+      try {
+        await ensureAudioRunning()
 
-  mediaGain.gain.cancelScheduledValues(audioContext.currentTime)
-  mediaGain.gain.setValueAtTime(1, audioContext.currentTime)
-}
+        const buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate)
+        const source = audioContext.createBufferSource()
+        source.buffer = buffer
+        source.connect(masterGain)
+        source.start(0)
 
-function createContext() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)()
-    masterGain = audioContext.createGain()
+        audioReady = (audioContext.state === "running")
+        console.log("audio init ok:", audioContext.state)
+      } catch (e) {
+        console.error("Audio init failed:", e)
+        audioReady = false
+      }
 
-    const vol = volumeSlider.value / 10
-    masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
-    masterGain.connect(audioContext.destination)
+      return audioReady
+    }
 
-    // media element용 gain 추가
-    mediaGain = audioContext.createGain()
-    mediaGain.gain.setValueAtTime(1, audioContext.currentTime)
+    function setEQ(state) {
+      if (!filterNode) return
+      filterNode.gain.value = state ? boostAmount : 0
+    }
 
-    // mediaPlayer를 Web Audio graph에 연결 (한 번만)
-    mediaSourceNode = audioContext.createMediaElementSource(mediaPlayer)
-    mediaSourceNode.connect(mediaGain)
-    mediaGain.connect(masterGain)
-  }
-}
-/* 🔊 모바일 오디오 언락 */
-async function initAudio() {
-  createContext()
+    volumeSlider.oninput = function () {
+      volumeValue.innerText = this.value
 
-  try {
-    await ensureAudioRunning()
+      if (masterGain && audioContext) {
+        const now = audioContext.currentTime
+        const target = this.value / 10
+        masterGain.gain.setTargetAtTime(target, now, 0.02)
+      }
 
-    const buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate)
-    const source = audioContext.createBufferSource()
-    source.buffer = buffer
-    source.connect(masterGain)
-    source.start(0)
+      if (!useMediaPlayback) {
+        mediaPlayer.volume = this.value / 10
+      }
+    }
 
-    audioReady = (audioContext.state === "running")
-    console.log("audio init ok:", audioContext.state)
-  } catch (e) {
-    console.error("Audio init failed:", e)
-    audioReady = false
-  }
+    async function fadeOutMediaPlayer(duration = SINE_FADE_OUT) {
+      createContext()
+      await ensureAudioRunning()
 
-  return audioReady
-}
-  
-async function stopAllAudio() {
-  if (useMediaPlayback) {
-    try {
-      if (!mediaPlayer.paused && !mediaPlayer.ended) {
-        await fadeOutMediaPlayer(SINE_FADE_OUT)
+      if (!mediaGain) return
+
+      const now = audioContext.currentTime
+      const current = mediaGain.gain.value
+
+      mediaGain.gain.cancelScheduledValues(now)
+      mediaGain.gain.setValueAtTime(current, now)
+      mediaGain.gain.linearRampToValueAtTime(0, now + duration)
+
+      await sleep(duration * 1000)
+
+      mediaPlayer.pause()
+      mediaPlayer.currentTime = 0
+
+      const resetTime = audioContext.currentTime
+      mediaGain.gain.cancelScheduledValues(resetTime)
+      mediaGain.gain.setValueAtTime(1, resetTime)
+    }
+
+    async function stopAllAudio() {
+      if (useMediaPlayback) {
+        try {
+          if (!mediaPlayer.paused && !mediaPlayer.ended) {
+            await fadeOutMediaPlayer(SINE_FADE_OUT)
+          } else {
+            mediaPlayer.pause()
+            mediaPlayer.currentTime = 0
+          }
+        } catch (e) {
+          mediaPlayer.pause()
+          mediaPlayer.currentTime = 0
+        }
       } else {
         mediaPlayer.pause()
         mediaPlayer.currentTime = 0
       }
-    } catch (e) {
-      mediaPlayer.pause()
-      mediaPlayer.currentTime = 0
-    }
-  } else {
-    mediaPlayer.pause()
-    mediaPlayer.currentTime = 0
-  }
 
-  if (!audioContext) return
+      if (!audioContext) return
 
-  const oldSineGain = sineGain
-  const oldSineOsc = sineOsc
-  const oldFilterNode = filterNode
-  const oldSourceNode = sourceNode
+      const oldSineGain = sineGain
+      const oldSineOsc = sineOsc
+      const oldFilterNode = filterNode
+      const oldSourceNode = sourceNode
 
-  sineGain = null
-  sineOsc = null
-  filterNode = null
-  sourceNode = null
-
-  const now = audioContext.currentTime
-  const fadeEnd = now + 0.03
-
-  if (oldSineGain) {
-    try {
-      oldSineGain.gain.cancelScheduledValues(now)
-      oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
-      oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
-    } catch (e) {}
-  }
-
-  if (oldSineOsc) {
-    try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
-  }
-
-  if (oldSourceNode) {
-    try { oldSourceNode.stop(now + 0.03) } catch (e) {}
-  }
-
-  setTimeout(() => {
-    if (oldSineGain) {
-      try { oldSineGain.disconnect() } catch (e) {}
-    }
-    if (oldFilterNode) {
-      try { oldFilterNode.disconnect() } catch (e) {}
-    }
-    if (oldSourceNode) {
-      try { oldSourceNode.disconnect() } catch (e) {}
-    }
-  }, 80)
-}
-
-  setTimeout(() => {
-    if (oldSineGain) {
-      try { oldSineGain.disconnect() } catch (e) {}
-    }
-    if (oldFilterNode) {
-      try { oldFilterNode.disconnect() } catch (e) {}
-    }
-    if (oldSourceNode) {
-      try { oldSourceNode.disconnect() } catch (e) {}
-    }
-  }, 80)
-}
-
-function setLevel(l) {
-  level = l
-
-  if (level === 1) activeFreqs = freqOct
-  if (level === 2) activeFreqs = freq23
-  if (level === 3) activeFreqs = freq13
-
-  correctAnswers = 0
-  totalQuestions = 0
-  updateScore()
-  updateBandDisplay()
-  updateLevelButtons()
-}
-
-async function selectMode(m) {
-  if (!audioReady && !useMediaPlayback) return
-
-  await stopAllAudio()
-
-  mode = m
-  resultText.innerText = ""
-  questionAnswered = false
-  clearBands()
-
-  correctAnswers = 0
-  totalQuestions = 0
-  updateScore()
-
-  controlArea.innerHTML = ""
-
-  if (mode === 1) {
-    controlArea.innerHTML = `
-      <button onclick="newQuestion()">Next</button>
-      <button onclick="replaySine()">Replay</button>
-    `
-  } else {
-    controlArea.innerHTML = `
-      <button onclick="newQuestion()">Next</button>
-      <button onclick="stopAllAudio()">Stop</button>
-      <button onclick="startPink()">Play</button>
-      <button onclick="setEQ(false)">EQ OFF</button>
-      <button onclick="setEQ(true)">EQ ON</button>
-    `
-  }
-
-  updateModeButtons()
-}
-async function newQuestion() {
-  if (!await ensureAudioRunning()) return
-
-  stopAllAudio()
-  await sleep(70)
-
-  createContext()
-
-  const now = audioContext.currentTime
-  masterGain.gain.cancelScheduledValues(now)
-  masterGain.gain.setValueAtTime(volumeSlider.value / 10, now)
-
-  feedbackImg.style.display = "none"
-  questionAnswered = false
-  resultText.innerText = ""
-  clearBands()
-
-  currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
-
-  if (mode === 1) {
-    await playSine(currentFrequency)
-    return
-  }
-
-  sourceNode = createPinkNoise(audioContext)
-
-  filterNode = audioContext.createBiquadFilter()
-  filterNode.type = "peaking"
-  filterNode.frequency.value = currentFrequency
-
-  if (level === 1) filterNode.Q.value = 1.4
-  if (level === 2) filterNode.Q.value = 2.1
-  if (level === 3) filterNode.Q.value = 4.3
-
-  if (mode === 2) boostAmount = 9
-  if (mode === 3) boostAmount = -9
-  if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
-
-  filterNode.gain.value = boostAmount
-
-  const compensationDb = getPinkCompensationDb()
-  const compensatedVolume =
-    (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
-
-  masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
-
-  sourceNode.connect(filterNode)
-  filterNode.connect(masterGain)
-}
-async function startPink() {
-  if (!currentFrequency) return
-  if (!await ensureAudioRunning()) return
-
-  stopAllAudio()
-  await sleep(70)
-
-  createContext()
-
-  const now = audioContext.currentTime
-
-  sourceNode = createPinkNoise(audioContext)
-
-  filterNode = audioContext.createBiquadFilter()
-  filterNode.type = "peaking"
-  filterNode.frequency.value = currentFrequency
-
-  if (level === 1) filterNode.Q.value = 1.4
-  if (level === 2) filterNode.Q.value = 2.1
-  if (level === 3) filterNode.Q.value = 4.3
-
-  filterNode.gain.value = boostAmount
-
-  const compensationDb = getPinkCompensationDb()
-  const compensatedVolume =
-    (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
-
-  masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
-
-  sourceNode.connect(filterNode)
-  filterNode.connect(masterGain)
-}
-  
-async function playSine(freq) {
-  if (useMediaPlayback) {
-    try {
-      createContext()
-      await ensureAudioRunning()
-
-      // 기존 재생 중이면 먼저 50ms 페이드아웃
-      if (!mediaPlayer.paused && !mediaPlayer.ended) {
-        await fadeOutMediaPlayer(SINE_FADE_OUT)
-      } else if (mediaGain) {
-        const now = audioContext.currentTime
-        mediaGain.gain.cancelScheduledValues(now)
-        mediaGain.gain.setValueAtTime(0, now)
-      }
-
-      mediaPlayer.src = `audio/sine_wav/${freq}.wav`
-      mediaPlayer.load()
+      sineGain = null
+      sineOsc = null
+      filterNode = null
+      sourceNode = null
 
       const now = audioContext.currentTime
-      mediaGain.gain.cancelScheduledValues(now)
-      mediaGain.gain.setValueAtTime(0, now)
+      const fadeEnd = now + 0.03
 
-      mediaPlayer.volume = 1
-      await mediaPlayer.play()
-
-      // 시작 시 50ms 페이드인
-      const start = audioContext.currentTime
-      mediaGain.gain.cancelScheduledValues(start)
-      mediaGain.gain.setValueAtTime(0, start)
-      mediaGain.gain.linearRampToValueAtTime(1, start + SINE_FADE_IN)
-
-    } catch (e) {
-      console.error("media playback failed:", e)
-    }
-    return
-  }
-
-  createContext()
-
-  const now = audioContext.currentTime
-  const osc = audioContext.createOscillator()
-  const gain = audioContext.createGain()
-
-  osc.type = "sine"
-  osc.frequency.value = freq
-
-  osc.connect(gain)
-  gain.connect(masterGain)
-
-  gain.gain.cancelScheduledValues(now)
-  gain.gain.setValueAtTime(0, now)
-  gain.gain.linearRampToValueAtTime(0.3, now + 0.05)   // 50ms fade in
-  gain.gain.setValueAtTime(0.3, now + 2.95)
-  gain.gain.linearRampToValueAtTime(0, now + 3.00)     // 50ms fade out
-
-  osc.start(now)
-  osc.stop(now + 3.03)
-
-  sineOsc = osc
-  sineGain = gain
-}
-async function replaySine() {
-  if (mode !== 1) return
-  if (!currentFrequency) return
-  if (!await ensureAudioRunning()) return
-
-  stopAllAudio()
-  await playSine(currentFrequency)
-}
-
-function createPinkNoise(ctx) {
-  const bufferSize = 4096
-  const pinkNoise = ctx.createScriptProcessor(bufferSize, 0, 1)
-
-  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
-
-  pinkNoise.onaudioprocess = function (e) {
-    const output = e.outputBuffer.getChannelData(0)
-
-    for (let i = 0; i < bufferSize; i++) {
-      const white = Math.random() * 2 - 1
-
-      b0 = 0.99886 * b0 + white * 0.0555179
-      b1 = 0.99332 * b1 + white * 0.0750759
-      b2 = 0.96900 * b2 + white * 0.1538520
-      b3 = 0.86650 * b3 + white * 0.3104856
-      b4 = 0.55000 * b4 + white * 0.5329522
-      b5 = -0.7616 * b5 - white * 0.0168980
-
-      output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.07
-      b6 = white * 0.115926
-    }
-  }
-
-  return pinkNoise
-}
-
-async function checkAnswer(freq, element) {
-  if (!mode) return
-
-  if (mode === 1) {
-    stopAllAudio()
-    await playSine(freq)
-  } else {
-    if (!await ensureAudioRunning()) return
-    if (audioContext && filterNode) {
-      filterNode.frequency.value = freq
-      setEQ(true)
-    }
-  }
-
-  if (!questionAnswered) {
-    totalQuestions++
-    clearBands()
-
-    if (freq === currentFrequency) {
-      correctAnswers++
-      element.classList.add("correct")
-      resultText.innerText = "Correct"
-      feedbackImg.src = "correct.png"
-      feedbackImg.style.display = "block"
-    } else {
-      element.classList.add("wrong")
-      highlightCorrect()
-      resultText.innerText = "Wrong (" + currentFrequency + "Hz)"
-      feedbackImg.src = "wrong.png"
-      feedbackImg.style.display = "block"
-    }
-
-    questionAnswered = true
-    updateScore()
-  }
-}
-  
-function clearBands() {
-  document.querySelectorAll(".eq-band").forEach(b => {
-    b.classList.remove("correct", "wrong")
-  })
-}
-
-function highlightCorrect() {
-  document.querySelectorAll(".eq-band").forEach(b => {
-    if (parseInt(b.dataset.freq) === currentFrequency) {
-      b.classList.add("correct")
-    }
-  })
-}
-
-function updateBandDisplay() {
-  document.querySelectorAll(".eq-band").forEach(b => {
-    const f = parseInt(b.dataset.freq)
-
-    if (activeFreqs.includes(f)) {
-      b.classList.remove("disabled")
-    } else {
-      b.classList.add("disabled")
-    }
-  })
-}
-
-function updateModeButtons() {
-  document.querySelectorAll(".mode-btn").forEach(btn => {
-    if (parseInt(btn.dataset.mode) === mode) {
-      btn.classList.remove("inactive")
-    } else {
-      btn.classList.add("inactive")
-    }
-  })
-}
-
-function updateLevelButtons() {
-  document.querySelectorAll(".level-btn").forEach(btn => {
-    if (parseInt(btn.dataset.level) === level) {
-      btn.classList.remove("inactive")
-    } else {
-      btn.classList.add("inactive")
-    }
-  })
-}
-
-freq13.forEach(freq => {
-  const band = document.createElement("div")
-  band.classList.add("eq-band")
-  band.dataset.freq = freq
-  band.innerText = freq >= 1000 ? (freq / 1000) + "k" : freq
-  band.onclick = () => checkAnswer(freq, band)
-  eqContainer.appendChild(band)
-})
-
-function updateScore() {
-  let percent = 0
-
-  if (totalQuestions > 0) {
-    percent = Math.round((correctAnswers / totalQuestions) * 100)
-  }
-
-  document.getElementById("score").innerText =
-    "Score: " + correctAnswers + " / " + totalQuestions + " (" + percent + "%)"
-}
-
-updateBandDisplay()
-updateModeButtons()
-updateLevelButtons()
-updateScore()
-
-const audioStartOverlay = document.getElementById("audioStartOverlay")
-const audioStartButton = document.getElementById("audioStartButton")
-
-async function handleAudioStart(e) {
-  e.preventDefault()
-  e.stopPropagation()
-
-  audioStartButton.disabled = true
-  audioStartButton.textContent = "Starting..."
-
-  let mediaOk = false
-  let webAudioOk = false
-
-  try {
-    mediaPlayer.src = "audio/sine_wav/silence.wav"
-    mediaPlayer.volume = 0.01
-    await mediaPlayer.play()
-    mediaPlayer.pause()
-    mediaPlayer.currentTime = 0
-    mediaOk = true
-  } catch (err) {
-    console.error("media warmup failed:", err)
-  }
-
-  try {
-    webAudioOk = await initAudio()
-  } catch (err) {
-    console.error("initAudio failed:", err)
-  }
-
-  // iPhone이면 media playback 경로를 쓸 수 있으니 바로 통과
-  if (useMediaPlayback || mediaOk || webAudioOk) {
-    audioReady = true
-    audioStartOverlay.style.display = "none"
-    return
-  }
-
-  audioStartButton.disabled = false
-  audioStartButton.textContent = "Tap to Start Audio"
-  alert("오디오를 시작하지 못했습니다.")
-}
-audioStartButton.addEventListener("pointerup", handleAudioStart)
-
-function getPinkCompensationDb() {
-  if (mode === 2) return -1   // Pink Boost: Sine보다 -1dB
-  if (mode === 3) return 1    // Pink Cut: Sine보다 +1dB
-  if (mode === 4) {
-    if (boostAmount > 0) return -1
-    if (boostAmount < 0) return 1
-  }
-  return 0
-}
-
-  async function ensureAudioRunning() {
-  createContext()
-
-  try {
-    if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
-      await audioContext.resume()
-    }
-  } catch (e) {
-    console.error("Audio resume failed:", e)
-  }
-
-  audioReady = (audioContext && audioContext.state === "running")
-  console.log("audio state:", audioContext ? audioContext.state : "no context")
-
-  return audioReady
-}
-
-  document.addEventListener("visibilitychange", async () => {
-  if (!document.hidden && audioContext) {
-    try {
-      if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
-        await audioContext.resume()
-        audioReady = (audioContext.state === "running")
-        console.log("resumed after visibilitychange:", audioContext.state)
+      if (oldSineGain) {
+        try {
+          oldSineGain.gain.cancelScheduledValues(now)
+          oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
+          oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
+        } catch (e) {}
       }
-    } catch (e) {
-      console.error("resume on visibilitychange failed:", e)
-    }
-  }
-})
 
-  function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-  
-</script>
+      if (oldSineOsc) {
+        try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
+      }
+
+      if (oldSourceNode) {
+        try { oldSourceNode.stop(now + 0.03) } catch (e) {}
+      }
+
+      setTimeout(() => {
+        if (oldSineGain) {
+          try { oldSineGain.disconnect() } catch (e) {}
+        }
+        if (oldFilterNode) {
+          try { oldFilterNode.disconnect() } catch (e) {}
+        }
+        if (oldSourceNode) {
+          try { oldSourceNode.disconnect() } catch (e) {}
+        }
+      }, 80)
+    }
+
+    function setLevel(l) {
+      level = l
+
+      if (level === 1) activeFreqs = freqOct
+      if (level === 2) activeFreqs = freq23
+      if (level === 3) activeFreqs = freq13
+
+      correctAnswers = 0
+      totalQuestions = 0
+      updateScore()
+      updateBandDisplay()
+      updateLevelButtons()
+    }
+
+    async function selectMode(m) {
+      if (!audioReady && !useMediaPlayback) return
+
+      await stopAllAudio()
+
+      mode = m
+      resultText.innerText = ""
+      questionAnswered = false
+      clearBands()
+
+      correctAnswers = 0
+      totalQuestions = 0
+      updateScore()
+
+      controlArea.innerHTML = ""
+
+      if (mode === 1) {
+        controlArea.innerHTML = `
+          <button onclick="newQuestion()">Next</button>
+          <button onclick="replaySine()">Replay</button>
+        `
+      } else {
+        controlArea.innerHTML = `
+          <button onclick="newQuestion()">Next</button>
+          <button onclick="stopAllAudio()">Stop</button>
+          <button onclick="startPink()">Play</button>
+          <button onclick="setEQ(false)">EQ OFF</button>
+          <button onclick="setEQ(true)">EQ ON</button>
+        `
+      }
+
+      updateModeButtons()
+    }
+
+    async function newQuestion() {
+      if (!await ensureAudioRunning()) return
+
+      await stopAllAudio()
+      await sleep(70)
+
+      createContext()
+
+      const now = audioContext.currentTime
+      masterGain.gain.cancelScheduledValues(now)
+      masterGain.gain.setValueAtTime(volumeSlider.value / 10, now)
+
+      feedbackImg.style.display = "none"
+      resultText.innerText = ""
+      questionAnswered = false
+      clearBands()
+
+      currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
+
+      if (mode === 1) {
+        await playSine(currentFrequency)
+        return
+      }
+
+      sourceNode = createPinkNoise(audioContext)
+
+      filterNode = audioContext.createBiquadFilter()
+      filterNode.type = "peaking"
+      filterNode.frequency.value = currentFrequency
+
+      if (level === 1) filterNode.Q.value = 1.4
+      if (level === 2) filterNode.Q.value = 2.1
+      if (level === 3) filterNode.Q.value = 4.3
+
+      if (mode === 2) boostAmount = 9
+      if (mode === 3) boostAmount = -9
+      if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
+
+      filterNode.gain.value = boostAmount
+
+      const compensationDb = getPinkCompensationDb()
+      const compensatedVolume =
+        (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+
+      masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+
+      sourceNode.connect(filterNode)
+      filterNode.connect(masterGain)
+    }
+
+    async function startPink() {
+      if (!currentFrequency) return
+      if (!await ensureAudioRunning()) return
+
+      await stopAllAudio()
+      await sleep(70)
+
+      createContext()
+
+      const now = audioContext.currentTime
+
+      sourceNode = createPinkNoise(audioContext)
+
+      filterNode = audioContext.createBiquadFilter()
+      filterNode.type = "peaking"
+      filterNode.frequency.value = currentFrequency
+
+      if (level === 1) filterNode.Q.value = 1.4
+      if (level === 2) filterNode.Q.value = 2.1
+      if (level === 3) filterNode.Q.value = 4.3
+
+      filterNode.gain.value = boostAmount
+
+      const compensationDb = getPinkCompensationDb()
+      const compensatedVolume =
+        (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+
+      masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+
+      sourceNode.connect(filterNode)
+      filterNode.connect(masterGain)
+    }
+
+    async function playSine(freq) {
+      if (useMediaPlayback) {
+        try {
+          createContext()
+          await ensureAudioRunning()
+
+          if (!mediaPlayer.paused && !mediaPlayer.ended) {
+            await fadeOutMediaPlayer(SINE_FADE_OUT)
+          } else if (mediaGain) {
+            const now = audioContext.currentTime
+            mediaGain.gain.cancelScheduledValues(now)
+            mediaGain.gain.setValueAtTime(0, now)
+          }
+
+          mediaPlayer.src = `audio/sine_wav/${freq}.wav`
+          mediaPlayer.load()
+
+          const now = audioContext.currentTime
+          mediaGain.gain.cancelScheduledValues(now)
+          mediaGain.gain.setValueAtTime(0, now)
+
+          mediaPlayer.volume = 1
+          await mediaPlayer.play()
+
+          const start = audioContext.currentTime
+          mediaGain.gain.cancelScheduledValues(start)
+          mediaGain.gain.setValueAtTime(0, start)
+          mediaGain.gain.linearRampToValueAtTime(1, start + SINE_FADE_IN)
+        } catch (e) {
+          console.error("media playback failed:", e)
+        }
+        return
+      }
+
+      createContext()
+
+      const now = audioContext.currentTime
+      const osc = audioContext.createOscillator()
+      const gain = audioContext.createGain()
+
+      osc.type = "sine"
+      osc.frequency.value = freq
+
+      osc.connect(gain)
+      gain.connect(masterGain)
+
+      gain.gain.cancelScheduledValues(now)
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.05)
+      gain.gain.setValueAtTime(0.3, now + 2.95)
+      gain.gain.linearRampToValueAtTime(0, now + 3.00)
+
+      osc.start(now)
+      osc.stop(now + 3.03)
+
+      sineOsc = osc
+      sineGain = gain
+    }
+
+    async function replaySine() {
+      if (mode !== 1) return
+      if (!currentFrequency) return
+      if (!await ensureAudioRunning()) return
+
+      await stopAllAudio()
+      await playSine(currentFrequency)
+    }
+
+    function createPinkNoise(ctx) {
+      const bufferSize = 4096
+      const pinkNoise = ctx.createScriptProcessor(bufferSize, 0, 1)
+
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0
+
+      pinkNoise.onaudioprocess = function (e) {
+        const output = e.outputBuffer.getChannelData(0)
+
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1
+
+          b0 = 0.99886 * b0 + white * 0.0555179
+          b1 = 0.99332 * b1 + white * 0.0750759
+          b2 = 0.96900 * b2 + white * 0.1538520
+          b3 = 0.86650 * b3 + white * 0.3104856
+          b4 = 0.55000 * b4 + white * 0.5329522
+          b5 = -0.7616 * b5 - white * 0.0168980
+
+          output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.07
+          b6 = white * 0.115926
+        }
+      }
+
+      return pinkNoise
+    }
+
+    async function checkAnswer(freq, element) {
+      if (!mode) return
+
+      if (mode === 1) {
+        await stopAllAudio()
+        await playSine(freq)
+      } else {
+        if (!await ensureAudioRunning()) return
+        if (audioContext && filterNode) {
+          filterNode.frequency.value = freq
+          setEQ(true)
+        }
+      }
+
+      if (!questionAnswered) {
+        totalQuestions++
+        clearBands()
+
+        if (freq === currentFrequency) {
+          correctAnswers++
+          element.classList.add("correct")
+          resultText.innerText = "Correct"
+          feedbackImg.src = "correct.png"
+          feedbackImg.style.display = "block"
+        } else {
+          element.classList.add("wrong")
+          highlightCorrect()
+          resultText.innerText = "Wrong (" + currentFrequency + "Hz)"
+          feedbackImg.src = "wrong.png"
+          feedbackImg.style.display = "block"
+        }
+
+        questionAnswered = true
+        updateScore()
+      }
+    }
+
+    function clearBands() {
+      document.querySelectorAll(".eq-band").forEach(b => {
+        b.classList.remove("correct", "wrong")
+      })
+    }
+
+    function highlightCorrect() {
+      document.querySelectorAll(".eq-band").forEach(b => {
+        if (parseInt(b.dataset.freq) === currentFrequency) {
+          b.classList.add("correct")
+        }
+      })
+    }
+
+    function updateBandDisplay() {
+      document.querySelectorAll(".eq-band").forEach(b => {
+        const f = parseInt(b.dataset.freq)
+
+        if (activeFreqs.includes(f)) {
+          b.classList.remove("disabled")
+        } else {
+          b.classList.add("disabled")
+        }
+      })
+    }
+
+    function updateModeButtons() {
+      document.querySelectorAll(".mode-btn").forEach(btn => {
+        if (parseInt(btn.dataset.mode) === mode) {
+          btn.classList.remove("inactive")
+        } else {
+          btn.classList.add("inactive")
+        }
+      })
+    }
+
+    function updateLevelButtons() {
+      document.querySelectorAll(".level-btn").forEach(btn => {
+        if (parseInt(btn.dataset.level) === level) {
+          btn.classList.remove("inactive")
+        } else {
+          btn.classList.add("inactive")
+        }
+      })
+    }
+
+    function updateScore() {
+      let percent = 0
+
+      if (totalQuestions > 0) {
+        percent = Math.round((correctAnswers / totalQuestions) * 100)
+      }
+
+      document.getElementById("score").innerText =
+        "Score: " + correctAnswers + " / " + totalQuestions + " (" + percent + "%)"
+    }
+
+    function getPinkCompensationDb() {
+      if (mode === 2) return -1
+      if (mode === 3) return 1
+      if (mode === 4) {
+        if (boostAmount > 0) return -1
+        if (boostAmount < 0) return 1
+      }
+      return 0
+    }
+
+    async function handleAudioStart(e) {
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+
+      audioStartButton.disabled = true
+      audioStartButton.textContent = "Starting..."
+
+      let mediaOk = false
+      let webAudioOk = false
+
+      try {
+        mediaPlayer.src = "audio/sine_wav/silence.wav"
+        mediaPlayer.volume = 0.01
+        await mediaPlayer.play()
+        mediaPlayer.pause()
+        mediaPlayer.currentTime = 0
+        mediaOk = true
+      } catch (err) {
+        console.error("media warmup failed:", err)
+      }
+
+      try {
+        webAudioOk = await initAudio()
+      } catch (err) {
+        console.error("initAudio failed:", err)
+      }
+
+      if (useMediaPlayback || mediaOk || webAudioOk) {
+        audioReady = true
+        audioStartOverlay.style.display = "none"
+        return
+      }
+
+      audioStartButton.disabled = false
+      audioStartButton.textContent = "Tap to Start Audio"
+      alert("오디오를 시작하지 못했습니다.")
+    }
+
+    document.addEventListener("visibilitychange", async () => {
+      if (!document.hidden && audioContext) {
+        try {
+          if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
+            await audioContext.resume()
+            audioReady = (audioContext.state === "running")
+            console.log("resumed after visibilitychange:", audioContext.state)
+          }
+        } catch (e) {
+          console.error("resume on visibilitychange failed:", e)
+        }
+      }
+    })
+
+    freq13.forEach(freq => {
+      const band = document.createElement("div")
+      band.classList.add("eq-band")
+      band.dataset.freq = freq
+      band.innerText = freq >= 1000 ? (freq / 1000) + "k" : freq
+      band.onclick = () => checkAnswer(freq, band)
+      eqContainer.appendChild(band)
+    })
+
+    audioStartButton.addEventListener("click", handleAudioStart)
+
+    updateBandDisplay()
+    updateModeButtons()
+    updateLevelButtons()
+    updateScore()
+  </script>
 </body>
 </html>
