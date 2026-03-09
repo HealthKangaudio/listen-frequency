@@ -289,6 +289,11 @@ z-index:9999;
 </div>
 
 <script>  
+  let mediaSourceNode = null
+let mediaGain = null
+
+const SINE_FADE_IN = 0.05
+const SINE_FADE_OUT = 0.05
 
   function setEQ(state) {
   if (!filterNode) return
@@ -367,6 +372,27 @@ volumeSlider.oninput = function () {
 
   mediaPlayer.volume = this.value / 10
 }
+  async function fadeOutMediaPlayer(duration = SINE_FADE_OUT) {
+  createContext()
+  await ensureAudioRunning()
+
+  if (!mediaGain) return
+
+  const now = audioContext.currentTime
+  const current = mediaGain.gain.value
+
+  mediaGain.gain.cancelScheduledValues(now)
+  mediaGain.gain.setValueAtTime(current, now)
+  mediaGain.gain.linearRampToValueAtTime(0, now + duration)
+
+  await sleep(duration * 1000)
+
+  mediaPlayer.pause()
+  mediaPlayer.currentTime = 0
+
+  mediaGain.gain.cancelScheduledValues(audioContext.currentTime)
+  mediaGain.gain.setValueAtTime(1, audioContext.currentTime)
+}
 
 function createContext() {
   if (!audioContext) {
@@ -376,9 +402,17 @@ function createContext() {
     const vol = volumeSlider.value / 10
     masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
     masterGain.connect(audioContext.destination)
+
+    // media element용 gain 추가
+    mediaGain = audioContext.createGain()
+    mediaGain.gain.setValueAtTime(1, audioContext.currentTime)
+
+    // mediaPlayer를 Web Audio graph에 연결 (한 번만)
+    mediaSourceNode = audioContext.createMediaElementSource(mediaPlayer)
+    mediaSourceNode.connect(mediaGain)
+    mediaGain.connect(masterGain)
   }
 }
-
 /* 🔊 모바일 오디오 언락 */
 async function initAudio() {
   createContext()
@@ -402,9 +436,23 @@ async function initAudio() {
   return audioReady
 }
   
-function stopAllAudio() {
-  mediaPlayer.pause()
-  mediaPlayer.currentTime = 0
+async function stopAllAudio() {
+  if (useMediaPlayback) {
+    try {
+      if (!mediaPlayer.paused && !mediaPlayer.ended) {
+        await fadeOutMediaPlayer(SINE_FADE_OUT)
+      } else {
+        mediaPlayer.pause()
+        mediaPlayer.currentTime = 0
+      }
+    } catch (e) {
+      mediaPlayer.pause()
+      mediaPlayer.currentTime = 0
+    }
+  } else {
+    mediaPlayer.pause()
+    mediaPlayer.currentTime = 0
+  }
 
   if (!audioContext) return
 
@@ -450,6 +498,19 @@ function stopAllAudio() {
   }, 80)
 }
 
+  setTimeout(() => {
+    if (oldSineGain) {
+      try { oldSineGain.disconnect() } catch (e) {}
+    }
+    if (oldFilterNode) {
+      try { oldFilterNode.disconnect() } catch (e) {}
+    }
+    if (oldSourceNode) {
+      try { oldSourceNode.disconnect() } catch (e) {}
+    }
+  }, 80)
+}
+
 function setLevel(l) {
   level = l
 
@@ -464,10 +525,10 @@ function setLevel(l) {
   updateLevelButtons()
 }
 
-function selectMode(m) {
+async function selectMode(m) {
   if (!audioReady && !useMediaPlayback) return
 
-  stopAllAudio()
+  await stopAllAudio()
 
   mode = m
   resultText.innerText = ""
@@ -582,11 +643,34 @@ async function startPink() {
 async function playSine(freq) {
   if (useMediaPlayback) {
     try {
-      mediaPlayer.pause()
-      mediaPlayer.currentTime = 0
+      createContext()
+      await ensureAudioRunning()
+
+      // 기존 재생 중이면 먼저 50ms 페이드아웃
+      if (!mediaPlayer.paused && !mediaPlayer.ended) {
+        await fadeOutMediaPlayer(SINE_FADE_OUT)
+      } else if (mediaGain) {
+        const now = audioContext.currentTime
+        mediaGain.gain.cancelScheduledValues(now)
+        mediaGain.gain.setValueAtTime(0, now)
+      }
+
       mediaPlayer.src = `audio/sine_wav/${freq}.wav`
-      mediaPlayer.volume = volumeSlider.value / 10
+      mediaPlayer.load()
+
+      const now = audioContext.currentTime
+      mediaGain.gain.cancelScheduledValues(now)
+      mediaGain.gain.setValueAtTime(0, now)
+
+      mediaPlayer.volume = 1
       await mediaPlayer.play()
+
+      // 시작 시 50ms 페이드인
+      const start = audioContext.currentTime
+      mediaGain.gain.cancelScheduledValues(start)
+      mediaGain.gain.setValueAtTime(0, start)
+      mediaGain.gain.linearRampToValueAtTime(1, start + SINE_FADE_IN)
+
     } catch (e) {
       console.error("media playback failed:", e)
     }
@@ -607,9 +691,9 @@ async function playSine(freq) {
 
   gain.gain.cancelScheduledValues(now)
   gain.gain.setValueAtTime(0, now)
-  gain.gain.linearRampToValueAtTime(0.3, now + 0.02)
-  gain.gain.setValueAtTime(0.3, now + 2.98)
-  gain.gain.linearRampToValueAtTime(0, now + 3.00)
+  gain.gain.linearRampToValueAtTime(0.3, now + 0.05)   // 50ms fade in
+  gain.gain.setValueAtTime(0.3, now + 2.95)
+  gain.gain.linearRampToValueAtTime(0, now + 3.00)     // 50ms fade out
 
   osc.start(now)
   osc.stop(now + 3.03)
