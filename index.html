@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+  <button onclick="testBeep()">TEST 440Hz</button>
 <head>
 <title>Listen Frequency</title>
 
@@ -690,6 +691,36 @@ function getPinkCompensationDb() {
 
   function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+  async function testBeep() {
+  createContext()
+
+  try {
+    if (audioContext.state !== "running") {
+      await audioContext.resume()
+    }
+
+    const now = audioContext.currentTime
+    const osc = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+
+    osc.type = "sine"
+    osc.frequency.setValueAtTime(440, now)
+
+    gain.gain.setValueAtTime(0, now)
+    gain.gain.linearRampToValueAtTime(0.2, now + 0.01)
+    gain.gain.setValueAtTime(0.2, now + 0.5)
+    gain.gain.linearRampToValueAtTime(0, now + 0.7)
+
+    osc.connect(gain)
+    gain.connect(audioContext.destination)
+
+    osc.start(now)
+    osc.stop(now + 0.75)
+  } catch (e) {
+    alert("testBeep error")
+  }
 }
   
 </script>
