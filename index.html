@@ -131,7 +131,6 @@ animation:pop 0.35s ease;
 </head>
 
 <body>
-
   <audio id="mediaPlayer" playsinline preload="auto"></audio>
 
   <div id="audioStartOverlay" style="
@@ -194,11 +193,15 @@ z-index:9999;
 </div>
 
 <script>
+audioStartButton.addEventListener("click", handleAudioStart)
+  
   const mediaPlayer = document.getElementById("mediaPlayer")
-let useMediaPlayback = false
-  function isIPhone() {
+
+function isIPhone() {
   return /iPhone/i.test(navigator.userAgent)
 }
+
+let useMediaPlayback = isIPhone()
 
 useMediaPlayback = isIPhone()
 
@@ -206,7 +209,7 @@ useMediaPlayback = isIPhone()
   try {
     mediaPlayer.pause()
     mediaPlayer.currentTime = 0
-    mediaPlayer.src = `audio/sine/${freq}.m4a`
+    mediaPlayer.src = `audio/sine_wav/${freq}.wav`
     mediaPlayer.volume = volumeSlider.value / 10
     await mediaPlayer.play()
   } catch (e) {
@@ -483,7 +486,15 @@ async function startPink() {
   
 async function playSine(freq) {
   if (useMediaPlayback) {
-    await playSineFile(freq)
+    try {
+      mediaPlayer.pause()
+      mediaPlayer.currentTime = 0
+      mediaPlayer.src = `audio/sine_wav/${freq}.wav`
+      mediaPlayer.volume = volumeSlider.value / 10
+      await mediaPlayer.play()
+    } catch (e) {
+      console.error("media playback failed:", e)
+    }
     return
   }
 
@@ -511,10 +522,10 @@ async function playSine(freq) {
   sineOsc = osc
   sineGain = gain
 }
-
 async function replaySine() {
   if (mode !== 1) return
   if (!currentFrequency) return
+  if (!await ensureAudioRunning()) return
 
   stopAllAudio()
   await playSine(currentFrequency)
@@ -552,9 +563,9 @@ async function checkAnswer(freq, element) {
   if (!mode) return
 
   if (mode === 1) {
-  stopAllAudio()
-  await playSine(freq)
-}
+    stopAllAudio()
+    await playSine(freq)
+  } else {
     if (audioContext && filterNode) {
       filterNode.frequency.value = freq
       setEQ(true)
@@ -661,7 +672,7 @@ async function handleAudioStart(e) {
   e.preventDefault()
 
   try {
-    mediaPlayer.src = "audio/silence.m4a"
+    mediaPlayer.src = "audio/sine_wav/silence.wav"
     mediaPlayer.volume = 0.01
     await mediaPlayer.play()
     mediaPlayer.pause()
