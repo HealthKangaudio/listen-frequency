@@ -289,6 +289,8 @@
   </div>
 
   <script>
+    const IOS_START_DELAY = 0.02
+    const IOS_STOP_DELAY = 0.02
     const mediaPlayer = document.getElementById("mediaPlayer")
     const volumeSlider = document.getElementById("volumeSlider")
     const volumeValue = document.getElementById("volumeValue")
@@ -306,8 +308,8 @@
 
     let audioReady = false
 
-    const SINE_FADE_IN = 0.05
-    const SINE_FADE_OUT = 0.05
+    const SINE_FADE_IN = 0.08
+    const SINE_FADE_OUT = 0.06
 
     const freq13 = [
       63,80,100,125,160,200,250,315,
@@ -427,27 +429,27 @@
     }
 
     async function fadeOutMediaPlayer(duration = SINE_FADE_OUT) {
-      createContext()
-      await ensureAudioRunning()
+  createContext()
+  await ensureAudioRunning()
 
-      if (!mediaGain) return
+  if (!mediaGain) return
 
-      const now = audioContext.currentTime
-      const current = mediaGain.gain.value
+  const now = audioContext.currentTime
+  const current = mediaGain.gain.value
 
-      mediaGain.gain.cancelScheduledValues(now)
-      mediaGain.gain.setValueAtTime(current, now)
-      mediaGain.gain.linearRampToValueAtTime(0, now + duration)
+  mediaGain.gain.cancelScheduledValues(now)
+  mediaGain.gain.setValueAtTime(current, now)
+  mediaGain.gain.linearRampToValueAtTime(0, now + duration)
 
-      await sleep(duration * 1000)
+  await sleep((duration + IOS_STOP_DELAY) * 1000)
 
-      mediaPlayer.pause()
-      mediaPlayer.currentTime = 0
+  mediaPlayer.pause()
+  mediaPlayer.currentTime = 0
 
-      const resetTime = audioContext.currentTime
-      mediaGain.gain.cancelScheduledValues(resetTime)
-      mediaGain.gain.setValueAtTime(1, resetTime)
-    }
+  const resetTime = audioContext.currentTime
+  mediaGain.gain.cancelScheduledValues(resetTime)
+  mediaGain.gain.setValueAtTime(1, resetTime)
+}
 
     async function stopAllAudio() {
       if (useMediaPlayback) {
@@ -645,65 +647,64 @@
     async function playSine(freq) {
   if (useMediaPlayback) {
     try {
-      createContext();
-      await ensureAudioRunning();
+      createContext()
+      await ensureAudioRunning()
 
       if (!mediaPlayer.paused && !mediaPlayer.ended) {
-        await fadeOutMediaPlayer(SINE_FADE_OUT);
+        await fadeOutMediaPlayer(SINE_FADE_OUT)
       } else if (mediaGain) {
-        const now = audioContext.currentTime;
-        mediaGain.gain.cancelScheduledValues(now);
-        mediaGain.gain.setValueAtTime(0, now);
+        const now = audioContext.currentTime
+        mediaGain.gain.cancelScheduledValues(now)
+        mediaGain.gain.setValueAtTime(0, now)
       }
 
-      mediaPlayer.src = `audio/sine_wav/${freq}.wav`;
+      mediaPlayer.src = `audio/sine_wav/${freq}.wav`
+      mediaPlayer.currentTime = 0
+      mediaPlayer.volume = 1
+      mediaPlayer.preload = "auto"
+      mediaPlayer.playsInline = true
 
-      const onReady = async () => {
-        try {
-          mediaPlayer.currentTime = 0;
-          mediaPlayer.volume = 1;
-          await mediaPlayer.play();
+      const now = audioContext.currentTime
+      mediaGain.gain.cancelScheduledValues(now)
+      mediaGain.gain.setValueAtTime(0, now)
 
-          const t = audioContext.currentTime;
-          mediaGain.gain.cancelScheduledValues(t);
-          mediaGain.gain.setValueAtTime(0, t);
-          mediaGain.gain.linearRampToValueAtTime(1, t + SINE_FADE_IN);
-        } catch (e) {
-          console.error("media playback failed:", e);
-        }
-      };
+      await mediaPlayer.play()
 
-      mediaPlayer.addEventListener("loadeddata", onReady, { once: true });
-      mediaPlayer.load();
+      await sleep(IOS_START_DELAY * 1000)
+
+      const start = audioContext.currentTime
+      mediaGain.gain.cancelScheduledValues(start)
+      mediaGain.gain.setValueAtTime(0, start)
+      mediaGain.gain.linearRampToValueAtTime(1, start + SINE_FADE_IN)
     } catch (e) {
-      console.error("media playback failed:", e);
+      console.error("media playback failed:", e)
     }
-    return;
+    return
   }
 
-  createContext();
+  createContext()
 
-  const now = audioContext.currentTime;
-  const osc = audioContext.createOscillator();
-  const gain = audioContext.createGain();
+  const now = audioContext.currentTime
+  const osc = audioContext.createOscillator()
+  const gain = audioContext.createGain()
 
-  osc.type = "sine";
-  osc.frequency.value = freq;
+  osc.type = "sine"
+  osc.frequency.value = freq
 
-  osc.connect(gain);
-  gain.connect(masterGain);
+  osc.connect(gain)
+  gain.connect(masterGain)
 
-  gain.gain.cancelScheduledValues(now);
-  gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
-  gain.gain.setValueAtTime(0.3, now + 2.95);
-  gain.gain.linearRampToValueAtTime(0, now + 3.00);
+  gain.gain.cancelScheduledValues(now)
+  gain.gain.setValueAtTime(0, now)
+  gain.gain.linearRampToValueAtTime(0.3, now + 0.05)
+  gain.gain.setValueAtTime(0.3, now + 2.95)
+  gain.gain.linearRampToValueAtTime(0, now + 3.00)
 
-  osc.start(now);
-  osc.stop(now + 3.03);
+  osc.start(now)
+  osc.stop(now + 3.03)
 
-  sineOsc = osc;
-  sineGain = gain;
+  sineOsc = osc
+  sineGain = gain
 }
 
     async function replaySine() {
