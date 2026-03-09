@@ -224,6 +224,33 @@
 </head>
 
 <body>
+  <audio id="mediaPlayer" playsinline preload="auto"></audio>
+
+  <div id="audioStartOverlay" style="
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.75);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    touch-action:manipulation;
+  ">
+    <button id="audioStartButton" type="button" style="
+      font-size:24px;
+      padding:20px 30px;
+      border-radius:16px;
+      border:none;
+      background:#2d6a4f;
+      color:white;
+      font-family:'Orbitron', sans-serif;
+      min-height:56px;
+      min-width:220px;
+      touch-action:manipulation;
+    ">
+      Tap to Start Audio
+    </button>
+  </div>
 
   <h1>Listen Frequency</h1>
 
@@ -262,22 +289,25 @@
   </div>
 
   <script>
-    const IOS_START_DELAY = 0.02
-    const IOS_STOP_DELAY = 0.02
+    const mediaPlayer = document.getElementById("mediaPlayer")
     const volumeSlider = document.getElementById("volumeSlider")
     const volumeValue = document.getElementById("volumeValue")
     const eqContainer = document.getElementById("eqContainer")
     const resultText = document.getElementById("result")
     const controlArea = document.getElementById("controlArea")
     const feedbackImg = document.getElementById("feedbackImg")
+    const audioStartOverlay = document.getElementById("audioStartOverlay")
+    const audioStartButton = document.getElementById("audioStartButton")
 
     let audioContext = null
     let masterGain = null
+    let mediaSourceNode = null
+    let mediaGain = null
 
     let audioReady = false
 
-    const SINE_FADE_IN = 0.08
-    const SINE_FADE_OUT = 0.06
+    const SINE_FADE_IN = 0.05
+    const SINE_FADE_OUT = 0.05
 
     const freq13 = [
       63,80,100,125,160,200,250,315,
@@ -310,20 +340,33 @@
     let totalQuestions = 0
     let correctAnswers = 0
 
+    function isIPhone() {
+      return /iPhone/i.test(navigator.userAgent)
+    }
+
+    let useMediaPlayback = isIPhone()
+
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms))
     }
 
     function createContext() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)()
-    masterGain = audioContext.createGain()
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        masterGain = audioContext.createGain()
 
-    const vol = volumeSlider.value / 10
-    masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
-    masterGain.connect(audioContext.destination)
-  }
-}
+        const vol = volumeSlider.value / 10
+        masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
+        masterGain.connect(audioContext.destination)
+
+        mediaGain = audioContext.createGain()
+        mediaGain.gain.setValueAtTime(1, audioContext.currentTime)
+
+        mediaSourceNode = audioContext.createMediaElementSource(mediaPlayer)
+        mediaSourceNode.connect(mediaGain)
+        mediaGain.connect(masterGain)
+      }
+    }
 
     async function ensureAudioRunning() {
       createContext()
@@ -370,72 +413,103 @@
     }
 
     volumeSlider.oninput = function () {
-  volumeValue.innerText = this.value
+      volumeValue.innerText = this.value
 
-  if (masterGain && audioContext) {
-    const now = audioContext.currentTime
-    const target = this.value / 10
-    masterGain.gain.setTargetAtTime(target, now, 0.02)
-  }
-}
-  volumeValue.innerText = this.value
+      if (masterGain && audioContext) {
+        const now = audioContext.currentTime
+        const target = this.value / 10
+        masterGain.gain.setTargetAtTime(target, now, 0.02)
+      }
 
-  if (masterGain && audioContext) {
-    const now = audioContext.currentTime
-    const target = this.value / 10
-    masterGain.gain.setTargetAtTime(target, now, 0.02)
-  }
-}
+      if (!useMediaPlayback) {
+        mediaPlayer.volume = this.value / 10
+      }
+    }
 
-  const resetTime = audioContext.currentTime
-  mediaGain.gain.cancelScheduledValues(resetTime)
-  mediaGain.gain.setValueAtTime(1, resetTime)
-}
+    async function fadeOutMediaPlayer(duration = SINE_FADE_OUT) {
+      createContext()
+      await ensureAudioRunning()
+
+      if (!mediaGain) return
+
+      const now = audioContext.currentTime
+      const current = mediaGain.gain.value
+
+      mediaGain.gain.cancelScheduledValues(now)
+      mediaGain.gain.setValueAtTime(current, now)
+      mediaGain.gain.linearRampToValueAtTime(0, now + duration)
+
+      await sleep(duration * 1000)
+
+      mediaPlayer.pause()
+      mediaPlayer.currentTime = 0
+
+      const resetTime = audioContext.currentTime
+      mediaGain.gain.cancelScheduledValues(resetTime)
+      mediaGain.gain.setValueAtTime(1, resetTime)
+    }
 
     async function stopAllAudio() {
-  if (!audioContext) return
+      if (useMediaPlayback) {
+        try {
+          if (!mediaPlayer.paused && !mediaPlayer.ended) {
+            await fadeOutMediaPlayer(SINE_FADE_OUT)
+          } else {
+            mediaPlayer.pause()
+            mediaPlayer.currentTime = 0
+          }
+        } catch (e) {
+          mediaPlayer.pause()
+          mediaPlayer.currentTime = 0
+        }
+      } else {
+        mediaPlayer.pause()
+        mediaPlayer.currentTime = 0
+      }
 
-  const oldSineGain = sineGain
-  const oldSineOsc = sineOsc
-  const oldFilterNode = filterNode
-  const oldSourceNode = sourceNode
+      if (!audioContext) return
 
-  sineGain = null
-  sineOsc = null
-  filterNode = null
-  sourceNode = null
+      const oldSineGain = sineGain
+      const oldSineOsc = sineOsc
+      const oldFilterNode = filterNode
+      const oldSourceNode = sourceNode
 
-  const now = audioContext.currentTime
-  const fadeEnd = now + 0.03
+      sineGain = null
+      sineOsc = null
+      filterNode = null
+      sourceNode = null
 
-  if (oldSineGain) {
-    try {
-      oldSineGain.gain.cancelScheduledValues(now)
-      oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
-      oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
-    } catch (e) {}
-  }
+      const now = audioContext.currentTime
+      const fadeEnd = now + 0.03
 
-  if (oldSineOsc) {
-    try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
-  }
+      if (oldSineGain) {
+        try {
+          oldSineGain.gain.cancelScheduledValues(now)
+          oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
+          oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
+        } catch (e) {}
+      }
 
-  if (oldSourceNode) {
-    try { oldSourceNode.stop(now + 0.03) } catch (e) {}
-  }
+      if (oldSineOsc) {
+        try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
+      }
 
-  setTimeout(() => {
-    if (oldSineGain) {
-      try { oldSineGain.disconnect() } catch (e) {}
+      if (oldSourceNode) {
+        try { oldSourceNode.stop(now + 0.03) } catch (e) {}
+      }
+
+      setTimeout(() => {
+        if (oldSineGain) {
+          try { oldSineGain.disconnect() } catch (e) {}
+        }
+        if (oldFilterNode) {
+          try { oldFilterNode.disconnect() } catch (e) {}
+        }
+        if (oldSourceNode) {
+          try { oldSourceNode.disconnect() } catch (e) {}
+        }
+      }, 80)
     }
-    if (oldFilterNode) {
-      try { oldFilterNode.disconnect() } catch (e) {}
-    }
-    if (oldSourceNode) {
-      try { oldSourceNode.disconnect() } catch (e) {}
-    }
-  }, 80)
-}
 
     function setLevel(l) {
       level = l
@@ -452,38 +526,38 @@
     }
 
     async function selectMode(m) {
-  await ensureAudioRunning()
+      if (!audioReady && !useMediaPlayback) return
 
-  mode = m
-  resultText.innerText = ""
-  questionAnswered = false
-  clearBands()
+      await stopAllAudio()
 
-  correctAnswers = 0
-  totalQuestions = 0
-  updateScore()
+      mode = m
+      resultText.innerText = ""
+      questionAnswered = false
+      clearBands()
 
-  await stopAllAudio()
+      correctAnswers = 0
+      totalQuestions = 0
+      updateScore()
 
-  controlArea.innerHTML = ""
+      controlArea.innerHTML = ""
 
-  if (mode === 1) {
-    controlArea.innerHTML = `
-      <button onclick="newQuestion()">Next</button>
-      <button onclick="replaySine()">Replay</button>
-    `
-  } else {
-    controlArea.innerHTML = `
-      <button onclick="newQuestion()">Next</button>
-      <button onclick="stopAllAudio()">Stop</button>
-      <button onclick="startPink()">Play</button>
-      <button onclick="setEQ(false)">EQ OFF</button>
-      <button onclick="setEQ(true)">EQ ON</button>
-    `
-  }
+      if (mode === 1) {
+        controlArea.innerHTML = `
+          <button onclick="newQuestion()">Next</button>
+          <button onclick="replaySine()">Replay</button>
+        `
+      } else {
+        controlArea.innerHTML = `
+          <button onclick="newQuestion()">Next</button>
+          <button onclick="stopAllAudio()">Stop</button>
+          <button onclick="startPink()">Play</button>
+          <button onclick="setEQ(false)">EQ OFF</button>
+          <button onclick="setEQ(true)">EQ ON</button>
+        `
+      }
 
-  updateModeButtons()
-}
+      updateModeButtons()
+    }
 
     async function newQuestion() {
       if (!await ensureAudioRunning()) return
@@ -569,30 +643,63 @@
     }
 
     async function playSine(freq) {
-  createContext()
+      if (useMediaPlayback) {
+        try {
+          createContext()
+          await ensureAudioRunning()
 
-  const now = audioContext.currentTime
-  const osc = audioContext.createOscillator()
-  const gain = audioContext.createGain()
+          if (!mediaPlayer.paused && !mediaPlayer.ended) {
+            await fadeOutMediaPlayer(SINE_FADE_OUT)
+          } else if (mediaGain) {
+            const now = audioContext.currentTime
+            mediaGain.gain.cancelScheduledValues(now)
+            mediaGain.gain.setValueAtTime(0, now)
+          }
 
-  osc.type = "sine"
-  osc.frequency.value = freq
+          mediaPlayer.src = `audio/sine_wav/${freq}.wav`
+          mediaPlayer.load()
 
-  osc.connect(gain)
-  gain.connect(masterGain)
+          const now = audioContext.currentTime
+          mediaGain.gain.cancelScheduledValues(now)
+          mediaGain.gain.setValueAtTime(0, now)
 
-  gain.gain.cancelScheduledValues(now)
-  gain.gain.setValueAtTime(0, now)
-  gain.gain.linearRampToValueAtTime(0.3, now + 0.05)
-  gain.gain.setValueAtTime(0.3, now + 2.95)
-  gain.gain.linearRampToValueAtTime(0, now + 3.00)
+          mediaPlayer.volume = 1
+          await mediaPlayer.play()
 
-  osc.start(now)
-  osc.stop(now + 3.03)
+          const start = audioContext.currentTime
+          mediaGain.gain.cancelScheduledValues(start)
+          mediaGain.gain.setValueAtTime(0, start)
+          mediaGain.gain.linearRampToValueAtTime(1, start + SINE_FADE_IN)
+        } catch (e) {
+          console.error("media playback failed:", e)
+        }
+        return
+      }
 
-  sineOsc = osc
-  sineGain = gain
-}
+      createContext()
+
+      const now = audioContext.currentTime
+      const osc = audioContext.createOscillator()
+      const gain = audioContext.createGain()
+
+      osc.type = "sine"
+      osc.frequency.value = freq
+
+      osc.connect(gain)
+      gain.connect(masterGain)
+
+      gain.gain.cancelScheduledValues(now)
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.05)
+      gain.gain.setValueAtTime(0.3, now + 2.95)
+      gain.gain.linearRampToValueAtTime(0, now + 3.00)
+
+      osc.start(now)
+      osc.stop(now + 3.03)
+
+      sineOsc = osc
+      sineGain = gain
+    }
 
     async function replaySine() {
       if (mode !== 1) return
@@ -631,7 +738,6 @@
     }
 
     async function checkAnswer(freq, element) {
-      if (!await ensureAudioRunning()) return
       if (!mode) return
 
       if (mode === 1) {
@@ -734,6 +840,71 @@
       }
       return 0
     }
+
+    async function handleAudioStart(e) {
+      if (e) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+
+      audioStartButton.disabled = true
+      audioStartButton.textContent = "Starting..."
+
+      let mediaOk = false
+      let webAudioOk = false
+
+      try {
+        mediaPlayer.src = "audio/sine_wav/silence.wav"
+        mediaPlayer.volume = 0.01
+        await mediaPlayer.play()
+        mediaPlayer.pause()
+        mediaPlayer.currentTime = 0
+        mediaOk = true
+      } catch (err) {
+        console.error("media warmup failed:", err)
+      }
+
+      try {
+        webAudioOk = await initAudio()
+      } catch (err) {
+        console.error("initAudio failed:", err)
+      }
+
+      if (useMediaPlayback || mediaOk || webAudioOk) {
+        audioReady = true
+        audioStartOverlay.style.display = "none"
+        return
+      }
+
+      audioStartButton.disabled = false
+      audioStartButton.textContent = "Tap to Start Audio"
+      alert("오디오를 시작하지 못했습니다.")
+    }
+
+    document.addEventListener("visibilitychange", async () => {
+      if (!document.hidden && audioContext) {
+        try {
+          if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
+            await audioContext.resume()
+            audioReady = (audioContext.state === "running")
+            console.log("resumed after visibilitychange:", audioContext.state)
+          }
+        } catch (e) {
+          console.error("resume on visibilitychange failed:", e)
+        }
+      }
+    })
+
+    freq13.forEach(freq => {
+      const band = document.createElement("div")
+      band.classList.add("eq-band")
+      band.dataset.freq = freq
+      band.innerText = freq >= 1000 ? (freq / 1000) + "k" : freq
+      band.onclick = () => checkAnswer(freq, band)
+      eqContainer.appendChild(band)
+    })
+
+    audioStartButton.addEventListener("click", handleAudioStart)
 
     updateBandDisplay()
     updateModeButtons()
