@@ -132,6 +132,8 @@ animation:pop 0.35s ease;
 
 <body>
 
+  <audio id="mediaPlayer" playsinline preload="auto"></audio>
+
   <div id="audioStartOverlay" style="
 position:fixed;
 inset:0;
@@ -192,6 +194,25 @@ z-index:9999;
 </div>
 
 <script>
+  const mediaPlayer = document.getElementById("mediaPlayer")
+let useMediaPlayback = false
+  function isIPhone() {
+  return /iPhone/i.test(navigator.userAgent)
+}
+
+useMediaPlayback = isIPhone()
+
+  async function playSineFile(freq) {
+  try {
+    mediaPlayer.pause()
+    mediaPlayer.currentTime = 0
+    mediaPlayer.src = `audio/sine/${freq}.m4a`
+    mediaPlayer.volume = volumeSlider.value / 10
+    await mediaPlayer.play()
+  } catch (e) {
+    console.error("media playback failed:", e)
+  }
+}
 let audioContext = null
 let masterGain = null
 
@@ -243,6 +264,8 @@ volumeSlider.oninput = function () {
     const target = this.value / 10
     masterGain.gain.setTargetAtTime(target, now, 0.02)
   }
+
+  mediaPlayer.volume = this.value / 10
 }
 
 function createContext() {
@@ -280,22 +303,23 @@ async function initAudio() {
 }
   
 function stopAllAudio() {
+  mediaPlayer.pause()
+  mediaPlayer.currentTime = 0
+
   if (!audioContext) return
 
-  const now = audioContext.currentTime
-  const fadeEnd = now + 0.03
-
-  // 현재 노드들을 지역 변수로 캡처
   const oldSineGain = sineGain
   const oldSineOsc = sineOsc
   const oldFilterNode = filterNode
   const oldSourceNode = sourceNode
 
-  // 전역 참조는 먼저 끊기
   sineGain = null
   sineOsc = null
   filterNode = null
   sourceNode = null
+
+  const now = audioContext.currentTime
+  const fadeEnd = now + 0.03
 
   if (oldSineGain) {
     try {
@@ -306,24 +330,24 @@ function stopAllAudio() {
   }
 
   if (oldSineOsc) {
-    try {
-      oldSineOsc.stop(fadeEnd + 0.01)
-    } catch (e) {}
+    try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
+  }
+
+  if (oldSourceNode) {
+    try { oldSourceNode.stop(now + 0.03) } catch (e) {}
   }
 
   setTimeout(() => {
     if (oldSineGain) {
       try { oldSineGain.disconnect() } catch (e) {}
     }
-
     if (oldFilterNode) {
       try { oldFilterNode.disconnect() } catch (e) {}
     }
-
     if (oldSourceNode) {
       try { oldSourceNode.disconnect() } catch (e) {}
     }
-  }, 60)
+  }, 80)
 }
 
 function setLevel(l) {
@@ -394,9 +418,9 @@ async function newQuestion() {
   currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
 
   if (mode === 1) {
-    playSine(currentFrequency)
-    return
-  }
+  await playSine(currentFrequency)
+  return
+}
 
   sourceNode = createPinkNoise(audioContext)
 
@@ -457,7 +481,12 @@ async function startPink() {
   filterNode.connect(masterGain)
 }
   
-function playSine(freq) {
+async function playSine(freq) {
+  if (useMediaPlayback) {
+    await playSineFile(freq)
+    return
+  }
+
   createContext()
 
   const now = audioContext.currentTime
@@ -484,13 +513,11 @@ function playSine(freq) {
 }
 
 async function replaySine() {
-  if (!await ensureAudioRunning()) return
+  if (mode !== 1) return
   if (!currentFrequency) return
 
   stopAllAudio()
-  await sleep(70)
-
-  playSine(currentFrequency)
+  await playSine(currentFrequency)
 }
 
 function createPinkNoise(ctx) {
@@ -525,10 +552,9 @@ async function checkAnswer(freq, element) {
   if (!mode) return
 
   if (mode === 1) {
-    stopAllAudio()
-    await sleep(70)
-    playSine(freq)
-  } else {
+  stopAllAudio()
+  await playSine(freq)
+}
     if (audioContext && filterNode) {
       filterNode.frequency.value = freq
       setEQ(true)
@@ -634,17 +660,24 @@ const audioStartButton = document.getElementById("audioStartButton")
 async function handleAudioStart(e) {
   e.preventDefault()
 
+  try {
+    mediaPlayer.src = "audio/silence.m4a"
+    mediaPlayer.volume = 0.01
+    await mediaPlayer.play()
+    mediaPlayer.pause()
+    mediaPlayer.currentTime = 0
+  } catch (err) {
+    console.error("media warmup failed:", err)
+  }
+
   const ok = await initAudio()
 
-  if (ok) {
+  if (ok || useMediaPlayback) {
     audioStartOverlay.style.display = "none"
   } else {
     alert("오디오를 시작하지 못했습니다.")
   }
 }
-
-audioStartButton.addEventListener("click", handleAudioStart)
-
 
 function getPinkCompensationDb() {
   if (mode === 2) return -1   // Pink Boost: Sine보다 -1dB
