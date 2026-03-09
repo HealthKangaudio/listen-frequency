@@ -192,9 +192,7 @@ z-index:9999;
 
 </div>
 
-<script>
-audioStartButton.addEventListener("click", handleAudioStart)
-  
+<script>  
   const mediaPlayer = document.getElementById("mediaPlayer")
 
 function isIPhone() {
@@ -202,8 +200,6 @@ function isIPhone() {
 }
 
 let useMediaPlayback = isIPhone()
-
-useMediaPlayback = isIPhone()
 
   async function playSineFile(freq) {
   try {
@@ -689,6 +685,8 @@ async function handleAudioStart(e) {
     alert("오디오를 시작하지 못했습니다.")
   }
 }
+
+audioStartButton.addEventListener("click", handleAudioStart)
 
 function getPinkCompensationDb() {
   if (mode === 2) return -1   // Pink Boost: Sine보다 -1dB
