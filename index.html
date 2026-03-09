@@ -193,6 +193,17 @@ z-index:9999;
 </div>
 
 <script>  
+  async function playPinkFile(freq, type) {
+  try {
+    mediaPlayer.pause()
+    mediaPlayer.currentTime = 0
+    mediaPlayer.src = `audio/pink/${type}/${freq}.wav`
+    mediaPlayer.volume = volumeSlider.value / 10
+    await mediaPlayer.play()
+  } catch (e) {
+    console.error("pink media playback failed:", e)
+  }
+}
   const mediaPlayer = document.getElementById("mediaPlayer")
 
 function isIPhone() {
@@ -364,7 +375,7 @@ function setLevel(l) {
 }
 
 function selectMode(m) {
-  if (!audioReady) return
+  if (!audioReady && !useMediaPlayback) return
 
   stopAllAudio()
 
@@ -391,8 +402,10 @@ function selectMode(m) {
       <button onclick="startPink()">Play</button>
       <button onclick="setEQ(false)">EQ OFF</button>
       <button onclick="setEQ(true)">EQ ON</button>
-    `
-  }
+      function setEQ(state) {
+  if (!filterNode) return
+  filterNode.gain.value = state ? boostAmount : 0
+}
 
   updateModeButtons()
 }
@@ -417,10 +430,22 @@ async function newQuestion() {
   currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
 
   if (mode === 1) {
-  await playSine(currentFrequency)
-  return
-}
+    await playSine(currentFrequency)
+    return
+  }
 
+  if (mode === 2) boostAmount = 9
+  if (mode === 3) boostAmount = -9
+  if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
+
+  // 아이폰이면 파일 재생
+  if (useMediaPlayback) {
+    const pinkType = boostAmount > 0 ? "boost" : "cut"
+    await playPinkFile(currentFrequency, pinkType)
+    return
+  }
+
+  // 아이폰이 아니면 기존 Web Audio 경로 유지
   sourceNode = createPinkNoise(audioContext)
 
   filterNode = audioContext.createBiquadFilter()
@@ -430,10 +455,6 @@ async function newQuestion() {
   if (level === 1) filterNode.Q.value = 1.4
   if (level === 2) filterNode.Q.value = 2.1
   if (level === 3) filterNode.Q.value = 4.3
-
-  if (mode === 2) boostAmount = 9
-  if (mode === 3) boostAmount = -9
-  if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
 
   filterNode.gain.value = boostAmount
 
@@ -446,10 +467,19 @@ async function newQuestion() {
   sourceNode.connect(filterNode)
   filterNode.connect(masterGain)
 }
-
 async function startPink() {
-  if (!await ensureAudioRunning()) return
   if (!currentFrequency) return
+
+  // 아이폰이면 파일 재생
+  if (useMediaPlayback) {
+    stopAllAudio()
+    const pinkType = boostAmount > 0 ? "boost" : "cut"
+    await playPinkFile(currentFrequency, pinkType)
+    return
+  }
+
+  // 아이폰이 아니면 기존 Web Audio 경로 유지
+  if (!await ensureAudioRunning()) return
 
   stopAllAudio()
   await sleep(70)
@@ -555,16 +585,22 @@ function createPinkNoise(ctx) {
 }
 
 async function checkAnswer(freq, element) {
-  if (!await ensureAudioRunning()) return
   if (!mode) return
 
   if (mode === 1) {
     stopAllAudio()
     await playSine(freq)
   } else {
-    if (audioContext && filterNode) {
-      filterNode.frequency.value = freq
-      setEQ(true)
+    if (useMediaPlayback) {
+      stopAllAudio()
+      const pinkType = boostAmount > 0 ? "boost" : "cut"
+      await playPinkFile(freq, pinkType)
+    } else {
+      if (!await ensureAudioRunning()) return
+      if (audioContext && filterNode) {
+        filterNode.frequency.value = freq
+        setEQ(true)
+      }
     }
   }
 
@@ -590,6 +626,7 @@ async function checkAnswer(freq, element) {
     updateScore()
   }
 }
+  
 function clearBands() {
   document.querySelectorAll(".eq-band").forEach(b => {
     b.classList.remove("correct", "wrong")
