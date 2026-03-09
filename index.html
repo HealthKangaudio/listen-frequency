@@ -286,34 +286,43 @@ function stopAllAudio() {
   const now = audioContext.currentTime
   const fadeEnd = now + 0.03
 
-  if (sineGain) {
-    sineGain.gain.cancelScheduledValues(now)
-    sineGain.gain.setValueAtTime(sineGain.gain.value, now)
-    sineGain.gain.linearRampToValueAtTime(0, fadeEnd)
+  // 현재 노드들을 지역 변수로 캡처
+  const oldSineGain = sineGain
+  const oldSineOsc = sineOsc
+  const oldFilterNode = filterNode
+  const oldSourceNode = sourceNode
+
+  // 전역 참조는 먼저 끊기
+  sineGain = null
+  sineOsc = null
+  filterNode = null
+  sourceNode = null
+
+  if (oldSineGain) {
+    try {
+      oldSineGain.gain.cancelScheduledValues(now)
+      oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
+      oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
+    } catch (e) {}
   }
 
-  if (sineOsc) {
-    try { sineOsc.stop(fadeEnd + 0.01) } catch (e) {}
+  if (oldSineOsc) {
+    try {
+      oldSineOsc.stop(fadeEnd + 0.01)
+    } catch (e) {}
   }
 
   setTimeout(() => {
-    if (sineGain) {
-      try { sineGain.disconnect() } catch (e) {}
-      sineGain = null
+    if (oldSineGain) {
+      try { oldSineGain.disconnect() } catch (e) {}
     }
 
-    if (sineOsc) {
-      sineOsc = null
+    if (oldFilterNode) {
+      try { oldFilterNode.disconnect() } catch (e) {}
     }
 
-    if (filterNode) {
-      try { filterNode.disconnect() } catch (e) {}
-      filterNode = null
-    }
-
-    if (sourceNode) {
-      try { sourceNode.disconnect() } catch (e) {}
-      sourceNode = null
+    if (oldSourceNode) {
+      try { oldSourceNode.disconnect() } catch (e) {}
     }
   }, 60)
 }
@@ -370,6 +379,7 @@ async function newQuestion() {
   if (!await ensureAudioRunning()) return
 
   stopAllAudio()
+  await sleep(70)
 
   createContext()
 
@@ -420,6 +430,7 @@ async function startPink() {
   if (!currentFrequency) return
 
   stopAllAudio()
+  await sleep(70)
 
   createContext()
 
@@ -475,15 +486,12 @@ function playSine(freq) {
 
 async function replaySine() {
   if (!await ensureAudioRunning()) return
+  if (!currentFrequency) return
 
   stopAllAudio()
+  await sleep(70)
 
-  if (currentFrequency) playSine(currentFrequency)
-}
-
-function setEQ(state) {
-  if (!filterNode) return
-  filterNode.gain.value = state ? boostAmount : 0
+  playSine(currentFrequency)
 }
 
 function createPinkNoise(ctx) {
@@ -519,6 +527,7 @@ async function checkAnswer(freq, element) {
 
   if (mode === 1) {
     stopAllAudio()
+    await sleep(70)
     playSine(freq)
   } else {
     if (audioContext && filterNode) {
@@ -549,7 +558,6 @@ async function checkAnswer(freq, element) {
     updateScore()
   }
 }
-
 function clearBands() {
   document.querySelectorAll(".eq-band").forEach(b => {
     b.classList.remove("correct", "wrong")
@@ -679,6 +687,10 @@ function getPinkCompensationDb() {
     }
   }
 })
+
+  function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
   
 </script>
 </body>
