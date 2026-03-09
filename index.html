@@ -396,20 +396,25 @@ function selectMode(m) {
       <button onclick="replaySine()">Replay</button>
     `
   } else {
-    controlArea.innerHTML = `
-      <button onclick="newQuestion()">Next</button>
-      <button onclick="stopAllAudio()">Stop</button>
-      <button onclick="startPink()">Play</button>
-      <button onclick="setEQ(false)">EQ OFF</button>
-      <button onclick="setEQ(true)">EQ ON</button>
-      function setEQ(state) {
-  if (!filterNode) return
-  filterNode.gain.value = state ? boostAmount : 0
-}
+    if (useMediaPlayback) {
+      controlArea.innerHTML = `
+        <button onclick="newQuestion()">Next</button>
+        <button onclick="stopAllAudio()">Stop</button>
+        <button onclick="startPink()">Play</button>
+      `
+    } else {
+      controlArea.innerHTML = `
+        <button onclick="newQuestion()">Next</button>
+        <button onclick="stopAllAudio()">Stop</button>
+        <button onclick="startPink()">Play</button>
+        <button onclick="setEQ(false)">EQ OFF</button>
+        <button onclick="setEQ(true)">EQ ON</button>
+      `
+    }
+  }
 
   updateModeButtons()
 }
-
 async function newQuestion() {
   if (!await ensureAudioRunning()) return
 
