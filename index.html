@@ -225,32 +225,6 @@
 
 <body>
 
-  <div id="audioStartOverlay" style="
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.75);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    touch-action:manipulation;
-  ">
-    <button id="audioStartButton" type="button" style="
-      font-size:24px;
-      padding:20px 30px;
-      border-radius:16px;
-      border:none;
-      background:#2d6a4f;
-      color:white;
-      font-family:'Orbitron', sans-serif;
-      min-height:56px;
-      min-width:220px;
-      touch-action:manipulation;
-    ">
-      Tap to Start Audio
-    </button>
-  </div>
-
   <h1>Listen Frequency</h1>
 
   <div class="panel">
@@ -296,8 +270,6 @@
     const resultText = document.getElementById("result")
     const controlArea = document.getElementById("controlArea")
     const feedbackImg = document.getElementById("feedbackImg")
-    const audioStartOverlay = document.getElementById("audioStartOverlay")
-    const audioStartButton = document.getElementById("audioStartButton")
 
     let audioContext = null
     let masterGain = null
@@ -499,38 +471,38 @@
     }
 
     async function selectMode(m) {
-      if (!audioReady) return
+  await ensureAudioRunning()
 
-      await stopAllAudio()
+  mode = m
+  resultText.innerText = ""
+  questionAnswered = false
+  clearBands()
 
-      mode = m
-      resultText.innerText = ""
-      questionAnswered = false
-      clearBands()
+  correctAnswers = 0
+  totalQuestions = 0
+  updateScore()
 
-      correctAnswers = 0
-      totalQuestions = 0
-      updateScore()
+  await stopAllAudio()
 
-      controlArea.innerHTML = ""
+  controlArea.innerHTML = ""
 
-      if (mode === 1) {
-        controlArea.innerHTML = `
-          <button onclick="newQuestion()">Next</button>
-          <button onclick="replaySine()">Replay</button>
-        `
-      } else {
-        controlArea.innerHTML = `
-          <button onclick="newQuestion()">Next</button>
-          <button onclick="stopAllAudio()">Stop</button>
-          <button onclick="startPink()">Play</button>
-          <button onclick="setEQ(false)">EQ OFF</button>
-          <button onclick="setEQ(true)">EQ ON</button>
-        `
-      }
+  if (mode === 1) {
+    controlArea.innerHTML = `
+      <button onclick="newQuestion()">Next</button>
+      <button onclick="replaySine()">Replay</button>
+    `
+  } else {
+    controlArea.innerHTML = `
+      <button onclick="newQuestion()">Next</button>
+      <button onclick="stopAllAudio()">Stop</button>
+      <button onclick="startPink()">Play</button>
+      <button onclick="setEQ(false)">EQ OFF</button>
+      <button onclick="setEQ(true)">EQ ON</button>
+    `
+  }
 
-      updateModeButtons()
-    }
+  updateModeButtons()
+}
 
     async function newQuestion() {
       if (!await ensureAudioRunning()) return
@@ -678,6 +650,7 @@
     }
 
     async function checkAnswer(freq, element) {
+      if (!await ensureAudioRunning()) return
       if (!mode) return
 
       if (mode === 1) {
@@ -781,15 +754,6 @@
       return 0
     }
 
-    async function handleAudioStart(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-
-      audioStartButton.disabled = true
-      audioStartButton.textContent = "Starting..."
-
       async function handleAudioStart(e) {
   if (e) {
     e.preventDefault()
@@ -849,8 +813,6 @@
       band.onclick = () => checkAnswer(freq, band)
       eqContainer.appendChild(band)
     })
-
-    audioStartButton.addEventListener("click", handleAudioStart)
 
     updateBandDisplay()
     updateModeButtons()
