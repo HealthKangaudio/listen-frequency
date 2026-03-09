@@ -72,12 +72,12 @@ background:#d62828;
 
 .eq-container{
 display:flex;
-justify-content:flex-start;
+justify-content:center;
 align-items:flex-end;
-gap:6px;
+gap:8px;
 margin-top:24px;
 flex-wrap:nowrap;
-overflow-x:scroll;
+overflow-x:auto;
 overflow-y:hidden;
 padding:8px 4px 14px;
 box-sizing:border-box;
@@ -85,9 +85,15 @@ scrollbar-gutter: stable;
 scrollbar-width:auto;
 scrollbar-color:#2d6a4f #d7e7de;
 }
+  @media (max-width: 768px){
+  .eq-container{
+    justify-content:flex-start;
+    overflow-x:scroll;
+  }
+}
 
 .eq-container::-webkit-scrollbar{
-height:10px;
+height:12px;
 }
 
 .eq-container::-webkit-scrollbar-track{
