@@ -370,15 +370,6 @@
     }
 
     volumeSlider.oninput = function () {
-      volumeValue.innerText = this.value
-
-      if (masterGain && audioContext) {
-        const now = audioContext.currentTime
-        const target = this.value / 10
-        masterGain.gain.setTargetAtTime(target, now, 0.02)
-      }
-
-      volumeSlider.oninput = function () {
   volumeValue.innerText = this.value
 
   if (masterGain && audioContext) {
@@ -387,24 +378,14 @@
     masterGain.gain.setTargetAtTime(target, now, 0.02)
   }
 }
+  volumeValue.innerText = this.value
 
-    async function fadeOutMediaPlayer(duration = SINE_FADE_OUT) {
-  createContext()
-  await ensureAudioRunning()
-
-  if (!mediaGain) return
-
-  const now = audioContext.currentTime
-  const current = mediaGain.gain.value
-
-  mediaGain.gain.cancelScheduledValues(now)
-  mediaGain.gain.setValueAtTime(current, now)
-  mediaGain.gain.linearRampToValueAtTime(0, now + duration)
-
-  await sleep((duration + IOS_STOP_DELAY) * 1000)
-
-  mediaPlayer.pause()
-  mediaPlayer.currentTime = 0
+  if (masterGain && audioContext) {
+    const now = audioContext.currentTime
+    const target = this.value / 10
+    masterGain.gain.setTargetAtTime(target, now, 0.02)
+  }
+}
 
   const resetTime = audioContext.currentTime
   mediaGain.gain.cancelScheduledValues(resetTime)
@@ -753,66 +734,6 @@
       }
       return 0
     }
-
-      async function handleAudioStart(e) {
-  if (e) {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
-  audioStartButton.disabled = true
-  audioStartButton.textContent = "Starting..."
-
-  let webAudioOk = false
-
-  try {
-    webAudioOk = await initAudio()
-  } catch (err) {
-    console.error("initAudio failed:", err)
-  }
-
-  if (webAudioOk) {
-    audioReady = true
-    audioStartOverlay.style.display = "none"
-    return
-  }
-
-  audioStartButton.disabled = false
-  audioStartButton.textContent = "Tap to Start Audio"
-  alert("오디오를 시작하지 못했습니다.")
-}
-        audioReady = true
-        audioStartOverlay.style.display = "none"
-        return
-      }
-
-      audioStartButton.disabled = false
-      audioStartButton.textContent = "Tap to Start Audio"
-      alert("오디오를 시작하지 못했습니다.")
-    }
-
-    document.addEventListener("visibilitychange", async () => {
-      if (!document.hidden && audioContext) {
-        try {
-          if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
-            await audioContext.resume()
-            audioReady = (audioContext.state === "running")
-            console.log("resumed after visibilitychange:", audioContext.state)
-          }
-        } catch (e) {
-          console.error("resume on visibilitychange failed:", e)
-        }
-      }
-    })
-
-    freq13.forEach(freq => {
-      const band = document.createElement("div")
-      band.classList.add("eq-band")
-      band.dataset.freq = freq
-      band.innerText = freq >= 1000 ? (freq / 1000) + "k" : freq
-      band.onclick = () => checkAnswer(freq, band)
-      eqContainer.appendChild(band)
-    })
 
     updateBandDisplay()
     updateModeButtons()
