@@ -643,66 +643,68 @@
     }
 
     async function playSine(freq) {
-  if (!useMediaPlayback) return;
+  if (useMediaPlayback) {
+    try {
+      createContext();
+      await ensureAudioRunning();
 
-  createContext();
-  await ensureAudioRunning();
+      if (!mediaPlayer.paused && !mediaPlayer.ended) {
+        await fadeOutMediaPlayer(SINE_FADE_OUT);
+      } else if (mediaGain) {
+        const now = audioContext.currentTime;
+        mediaGain.gain.cancelScheduledValues(now);
+        mediaGain.gain.setValueAtTime(0, now);
+      }
 
-  const src = `audio/sine_wav/${freq}.wav`;
+      mediaPlayer.src = `audio/sine_wav/${freq}.wav`;
 
-  if (mediaPlayer.src !== new URL(src, location.href).href) {
-    mediaPlayer.src = src;
+      const onReady = async () => {
+        try {
+          mediaPlayer.currentTime = 0;
+          mediaPlayer.volume = 1;
+          await mediaPlayer.play();
+
+          const t = audioContext.currentTime;
+          mediaGain.gain.cancelScheduledValues(t);
+          mediaGain.gain.setValueAtTime(0, t);
+          mediaGain.gain.linearRampToValueAtTime(1, t + SINE_FADE_IN);
+        } catch (e) {
+          console.error("media playback failed:", e);
+        }
+      };
+
+      mediaPlayer.addEventListener("loadeddata", onReady, { once: true });
+      mediaPlayer.load();
+    } catch (e) {
+      console.error("media playback failed:", e);
+    }
+    return;
   }
 
+  createContext();
+
   const now = audioContext.currentTime;
-  mediaGain.gain.cancelScheduledValues(now);
-  mediaGain.gain.setValueAtTime(0, now);
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
 
-  await new Promise((resolve, reject) => {
-    const onReady = async () => {
-      mediaPlayer.removeEventListener("loadeddata", onReady);
-      try {
-        mediaPlayer.currentTime = 0;
-        await mediaPlayer.play();
+  osc.type = "sine";
+  osc.frequency.value = freq;
 
-        const t = audioContext.currentTime;
-        mediaGain.gain.setValueAtTime(0, t);
-        mediaGain.gain.linearRampToValueAtTime(1, t + 0.05);
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    };
+  osc.connect(gain);
+  gain.connect(masterGain);
 
-    mediaPlayer.addEventListener("loadeddata", onReady, { once: true });
-    mediaPlayer.load();
-  });
+  gain.gain.cancelScheduledValues(now);
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+  gain.gain.setValueAtTime(0.3, now + 2.95);
+  gain.gain.linearRampToValueAtTime(0, now + 3.00);
+
+  osc.start(now);
+  osc.stop(now + 3.03);
+
+  sineOsc = osc;
+  sineGain = gain;
 }
-
-      createContext()
-
-      const now = audioContext.currentTime
-      const osc = audioContext.createOscillator()
-      const gain = audioContext.createGain()
-
-      osc.type = "sine"
-      osc.frequency.value = freq
-
-      osc.connect(gain)
-      gain.connect(masterGain)
-
-      gain.gain.cancelScheduledValues(now)
-      gain.gain.setValueAtTime(0, now)
-      gain.gain.linearRampToValueAtTime(0.3, now + 0.05)
-      gain.gain.setValueAtTime(0.3, now + 2.95)
-      gain.gain.linearRampToValueAtTime(0, now + 3.00)
-
-      osc.start(now)
-      osc.stop(now + 3.03)
-
-      sineOsc = osc
-      sineGain = gain
-    }
 
     async function replaySine() {
       if (mode !== 1) return
