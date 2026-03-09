@@ -224,7 +224,6 @@
 </head>
 
 <body>
-  <audio id="mediaPlayer" playsinline preload="auto"></audio>
 
   <div id="audioStartOverlay" style="
     position:fixed;
@@ -291,7 +290,6 @@
   <script>
     const IOS_START_DELAY = 0.02
     const IOS_STOP_DELAY = 0.02
-    const mediaPlayer = document.getElementById("mediaPlayer")
     const volumeSlider = document.getElementById("volumeSlider")
     const volumeValue = document.getElementById("volumeValue")
     const eqContainer = document.getElementById("eqContainer")
@@ -303,8 +301,6 @@
 
     let audioContext = null
     let masterGain = null
-    let mediaSourceNode = null
-    let mediaGain = null
 
     let audioReady = false
 
@@ -342,33 +338,20 @@
     let totalQuestions = 0
     let correctAnswers = 0
 
-    function isIPhone() {
-      return /iPhone/i.test(navigator.userAgent)
-    }
-
-    let useMediaPlayback = isIPhone()
-
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms))
     }
 
     function createContext() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)()
-        masterGain = audioContext.createGain()
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    masterGain = audioContext.createGain()
 
-        const vol = volumeSlider.value / 10
-        masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
-        masterGain.connect(audioContext.destination)
-
-        mediaGain = audioContext.createGain()
-        mediaGain.gain.setValueAtTime(1, audioContext.currentTime)
-
-        mediaSourceNode = audioContext.createMediaElementSource(mediaPlayer)
-        mediaSourceNode.connect(mediaGain)
-        mediaGain.connect(masterGain)
-      }
-    }
+    const vol = volumeSlider.value / 10
+    masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
+    masterGain.connect(audioContext.destination)
+  }
+}
 
     async function ensureAudioRunning() {
       createContext()
@@ -423,10 +406,15 @@
         masterGain.gain.setTargetAtTime(target, now, 0.02)
       }
 
-      if (!useMediaPlayback) {
-        mediaPlayer.volume = this.value / 10
-      }
-    }
+      volumeSlider.oninput = function () {
+  volumeValue.innerText = this.value
+
+  if (masterGain && audioContext) {
+    const now = audioContext.currentTime
+    const target = this.value / 10
+    masterGain.gain.setTargetAtTime(target, now, 0.02)
+  }
+}
 
     async function fadeOutMediaPlayer(duration = SINE_FADE_OUT) {
   createContext()
@@ -452,66 +440,49 @@
 }
 
     async function stopAllAudio() {
-      if (useMediaPlayback) {
-        try {
-          if (!mediaPlayer.paused && !mediaPlayer.ended) {
-            await fadeOutMediaPlayer(SINE_FADE_OUT)
-          } else {
-            mediaPlayer.pause()
-            mediaPlayer.currentTime = 0
-          }
-        } catch (e) {
-          mediaPlayer.pause()
-          mediaPlayer.currentTime = 0
-        }
-      } else {
-        mediaPlayer.pause()
-        mediaPlayer.currentTime = 0
-      }
+  if (!audioContext) return
 
-      if (!audioContext) return
+  const oldSineGain = sineGain
+  const oldSineOsc = sineOsc
+  const oldFilterNode = filterNode
+  const oldSourceNode = sourceNode
 
-      const oldSineGain = sineGain
-      const oldSineOsc = sineOsc
-      const oldFilterNode = filterNode
-      const oldSourceNode = sourceNode
+  sineGain = null
+  sineOsc = null
+  filterNode = null
+  sourceNode = null
 
-      sineGain = null
-      sineOsc = null
-      filterNode = null
-      sourceNode = null
+  const now = audioContext.currentTime
+  const fadeEnd = now + 0.03
 
-      const now = audioContext.currentTime
-      const fadeEnd = now + 0.03
+  if (oldSineGain) {
+    try {
+      oldSineGain.gain.cancelScheduledValues(now)
+      oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
+      oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
+    } catch (e) {}
+  }
 
-      if (oldSineGain) {
-        try {
-          oldSineGain.gain.cancelScheduledValues(now)
-          oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
-          oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
-        } catch (e) {}
-      }
+  if (oldSineOsc) {
+    try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
+  }
 
-      if (oldSineOsc) {
-        try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
-      }
+  if (oldSourceNode) {
+    try { oldSourceNode.stop(now + 0.03) } catch (e) {}
+  }
 
-      if (oldSourceNode) {
-        try { oldSourceNode.stop(now + 0.03) } catch (e) {}
-      }
-
-      setTimeout(() => {
-        if (oldSineGain) {
-          try { oldSineGain.disconnect() } catch (e) {}
-        }
-        if (oldFilterNode) {
-          try { oldFilterNode.disconnect() } catch (e) {}
-        }
-        if (oldSourceNode) {
-          try { oldSourceNode.disconnect() } catch (e) {}
-        }
-      }, 80)
+  setTimeout(() => {
+    if (oldSineGain) {
+      try { oldSineGain.disconnect() } catch (e) {}
     }
+    if (oldFilterNode) {
+      try { oldFilterNode.disconnect() } catch (e) {}
+    }
+    if (oldSourceNode) {
+      try { oldSourceNode.disconnect() } catch (e) {}
+    }
+  }, 80)
+}
 
     function setLevel(l) {
       level = l
@@ -528,7 +499,7 @@
     }
 
     async function selectMode(m) {
-      if (!audioReady && !useMediaPlayback) return
+      if (!audioReady) return
 
       await stopAllAudio()
 
@@ -645,43 +616,6 @@
     }
 
     async function playSine(freq) {
-  if (useMediaPlayback) {
-    try {
-      createContext()
-      await ensureAudioRunning()
-
-      if (!mediaPlayer.paused && !mediaPlayer.ended) {
-        await fadeOutMediaPlayer(SINE_FADE_OUT)
-      } else if (mediaGain) {
-        const now = audioContext.currentTime
-        mediaGain.gain.cancelScheduledValues(now)
-        mediaGain.gain.setValueAtTime(0, now)
-      }
-
-      mediaPlayer.src = `audio/sine_wav/${freq}.wav`
-      mediaPlayer.currentTime = 0
-      mediaPlayer.volume = 1
-      mediaPlayer.preload = "auto"
-      mediaPlayer.playsInline = true
-
-      const now = audioContext.currentTime
-      mediaGain.gain.cancelScheduledValues(now)
-      mediaGain.gain.setValueAtTime(0, now)
-
-      await mediaPlayer.play()
-
-      await sleep(IOS_START_DELAY * 1000)
-
-      const start = audioContext.currentTime
-      mediaGain.gain.cancelScheduledValues(start)
-      mediaGain.gain.setValueAtTime(0, start)
-      mediaGain.gain.linearRampToValueAtTime(1, start + SINE_FADE_IN)
-    } catch (e) {
-      console.error("media playback failed:", e)
-    }
-    return
-  }
-
   createContext()
 
   const now = audioContext.currentTime
@@ -856,27 +790,33 @@
       audioStartButton.disabled = true
       audioStartButton.textContent = "Starting..."
 
-      let mediaOk = false
-      let webAudioOk = false
+      async function handleAudioStart(e) {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
 
-      try {
-        mediaPlayer.src = "audio/sine_wav/silence.wav"
-        mediaPlayer.volume = 0.01
-        await mediaPlayer.play()
-        mediaPlayer.pause()
-        mediaPlayer.currentTime = 0
-        mediaOk = true
-      } catch (err) {
-        console.error("media warmup failed:", err)
-      }
+  audioStartButton.disabled = true
+  audioStartButton.textContent = "Starting..."
 
-      try {
-        webAudioOk = await initAudio()
-      } catch (err) {
-        console.error("initAudio failed:", err)
-      }
+  let webAudioOk = false
 
-      if (useMediaPlayback || mediaOk || webAudioOk) {
+  try {
+    webAudioOk = await initAudio()
+  } catch (err) {
+    console.error("initAudio failed:", err)
+  }
+
+  if (webAudioOk) {
+    audioReady = true
+    audioStartOverlay.style.display = "none"
+    return
+  }
+
+  audioStartButton.disabled = false
+  audioStartButton.textContent = "Tap to Start Audio"
+  alert("오디오를 시작하지 못했습니다.")
+}
         audioReady = true
         audioStartOverlay.style.display = "none"
         return
