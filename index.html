@@ -248,9 +248,7 @@ volumeSlider.oninput = function () {
 
 function createContext() {
   if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)({
-  sampleRate: 44100
-})
+    audioContext = new (window.AudioContext || window.webkitAudioContext)()
     masterGain = audioContext.createGain()
 
     const vol = volumeSlider.value / 10
@@ -264,28 +262,16 @@ async function initAudio() {
   createContext()
 
   try {
-    if (audioContext.state !== "running") {
-      await audioContext.resume()
-    }
+    await ensureAudioRunning()
 
-    // iPhone Safari 출력 경로 워밍업
-    const osc = audioContext.createOscillator()
-    const gain = audioContext.createGain()
-
-    osc.type = "sine"
-    osc.frequency.value = 440
-
-    // 거의 안 들릴 정도로 아주 작게
-    gain.gain.setValueAtTime(0.0001, audioContext.currentTime)
-
-    osc.connect(gain)
-    gain.connect(masterGain)
-
-    osc.start(audioContext.currentTime)
-    osc.stop(audioContext.currentTime + 0.05)
+    const buffer = audioContext.createBuffer(1, 1, audioContext.sampleRate)
+    const source = audioContext.createBufferSource()
+    source.buffer = buffer
+    source.connect(masterGain)
+    source.start(0)
 
     audioReady = (audioContext.state === "running")
-    console.log("audio state:", audioContext.state)
+    console.log("audio init ok:", audioContext.state)
   } catch (e) {
     console.error("Audio init failed:", e)
     audioReady = false
@@ -293,7 +279,7 @@ async function initAudio() {
 
   return audioReady
 }
-
+  
 function stopAllAudio() {
   if (!audioContext) return
 
@@ -380,91 +366,87 @@ function selectMode(m) {
   updateModeButtons()
 }
 
-function newQuestion() {
-  if (!audioReady) return
+async function newQuestion() {
+  if (!await ensureAudioRunning()) return
 
   stopAllAudio()
 
-  setTimeout(() => {
-    createContext()
+  createContext()
 
-    const now = audioContext.currentTime
-    masterGain.gain.cancelScheduledValues(now)
-    masterGain.gain.setValueAtTime(volumeSlider.value / 10, now)
+  const now = audioContext.currentTime
+  masterGain.gain.cancelScheduledValues(now)
+  masterGain.gain.setValueAtTime(volumeSlider.value / 10, now)
 
-    feedbackImg.style.display = "none"
-    questionAnswered = false
-    resultText.innerText = ""
-    clearBands()
+  feedbackImg.style.display = "none"
+  questionAnswered = false
+  resultText.innerText = ""
+  clearBands()
 
-    currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
+  currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
 
-    if (mode === 1) {
-      playSine(currentFrequency)
-      return
-    }
+  if (mode === 1) {
+    playSine(currentFrequency)
+    return
+  }
 
-    sourceNode = createPinkNoise(audioContext)
+  sourceNode = createPinkNoise(audioContext)
 
-    filterNode = audioContext.createBiquadFilter()
-    filterNode.type = "peaking"
-    filterNode.frequency.value = currentFrequency
+  filterNode = audioContext.createBiquadFilter()
+  filterNode.type = "peaking"
+  filterNode.frequency.value = currentFrequency
 
-    if (level === 1) filterNode.Q.value = 1.4
-    if (level === 2) filterNode.Q.value = 2.1
-    if (level === 3) filterNode.Q.value = 4.3
+  if (level === 1) filterNode.Q.value = 1.4
+  if (level === 2) filterNode.Q.value = 2.1
+  if (level === 3) filterNode.Q.value = 4.3
 
-    if (mode === 2) boostAmount = 9
-    if (mode === 3) boostAmount = -9
-    if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
+  if (mode === 2) boostAmount = 9
+  if (mode === 3) boostAmount = -9
+  if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
 
-    filterNode.gain.value = boostAmount
+  filterNode.gain.value = boostAmount
 
-    const compensationDb = getPinkCompensationDb()
-    const compensatedVolume =
-      (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+  const compensationDb = getPinkCompensationDb()
+  const compensatedVolume =
+    (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
-    masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+  masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
 
-    sourceNode.connect(filterNode)
-    filterNode.connect(masterGain)
-  }, 60)
+  sourceNode.connect(filterNode)
+  filterNode.connect(masterGain)
 }
 
-function startPink() {
-  if (!audioReady) return
+async function startPink() {
+  if (!await ensureAudioRunning()) return
   if (!currentFrequency) return
 
   stopAllAudio()
 
-  setTimeout(() => {
-    createContext()
+  createContext()
 
-    const now = audioContext.currentTime
+  const now = audioContext.currentTime
 
-    sourceNode = createPinkNoise(audioContext)
+  sourceNode = createPinkNoise(audioContext)
 
-    filterNode = audioContext.createBiquadFilter()
-    filterNode.type = "peaking"
-    filterNode.frequency.value = currentFrequency
+  filterNode = audioContext.createBiquadFilter()
+  filterNode.type = "peaking"
+  filterNode.frequency.value = currentFrequency
 
-    if (level === 1) filterNode.Q.value = 1.4
-    if (level === 2) filterNode.Q.value = 2.1
-    if (level === 3) filterNode.Q.value = 4.3
+  if (level === 1) filterNode.Q.value = 1.4
+  if (level === 2) filterNode.Q.value = 2.1
+  if (level === 3) filterNode.Q.value = 4.3
 
-    filterNode.gain.value = boostAmount
+  filterNode.gain.value = boostAmount
 
-    const compensationDb = getPinkCompensationDb()
-    const compensatedVolume =
-      (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+  const compensationDb = getPinkCompensationDb()
+  const compensatedVolume =
+    (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
 
-    masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+  masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
 
-    sourceNode.connect(filterNode)
-    filterNode.connect(masterGain)
-  }, 60)
+  sourceNode.connect(filterNode)
+  filterNode.connect(masterGain)
 }
-
+  
 function playSine(freq) {
   createContext()
 
@@ -491,14 +473,12 @@ function playSine(freq) {
   sineGain = gain
 }
 
-function replaySine() {
-  if (!audioReady) return
+async function replaySine() {
+  if (!await ensureAudioRunning()) return
 
   stopAllAudio()
 
-  setTimeout(() => {
-    if (currentFrequency) playSine(currentFrequency)
-  }, 60)
+  if (currentFrequency) playSine(currentFrequency)
 }
 
 function setEQ(state) {
@@ -533,15 +513,13 @@ function createPinkNoise(ctx) {
   return pinkNoise
 }
 
-function checkAnswer(freq, element) {
-  if (!audioReady) return
+async function checkAnswer(freq, element) {
+  if (!await ensureAudioRunning()) return
   if (!mode) return
 
   if (mode === 1) {
     stopAllAudio()
-    setTimeout(() => {
-      playSine(freq)
-    }, 60)
+    playSine(freq)
   } else {
     if (audioContext && filterNode) {
       filterNode.frequency.value = freq
@@ -658,7 +636,6 @@ async function handleAudioStart(e) {
   }
 }
 
-audioStartButton.addEventListener("touchend", handleAudioStart, { passive: false })
 audioStartButton.addEventListener("click", handleAudioStart)
 
 
@@ -671,6 +648,38 @@ function getPinkCompensationDb() {
   }
   return 0
 }
+
+  async function ensureAudioRunning() {
+  createContext()
+
+  try {
+    if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
+      await audioContext.resume()
+    }
+  } catch (e) {
+    console.error("Audio resume failed:", e)
+  }
+
+  audioReady = (audioContext && audioContext.state === "running")
+  console.log("audio state:", audioContext ? audioContext.state : "no context")
+
+  return audioReady
+}
+
+  document.addEventListener("visibilitychange", async () => {
+  if (!document.hidden && audioContext) {
+    try {
+      if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
+        await audioContext.resume()
+        audioReady = (audioContext.state === "running")
+        console.log("resumed after visibilitychange:", audioContext.state)
+      }
+    } catch (e) {
+      console.error("resume on visibilitychange failed:", e)
+    }
+  }
+})
+  
 </script>
 </body>
 </html>
