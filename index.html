@@ -287,6 +287,21 @@
   </div>
 
   <script>
+    let eqState = true
+    function updateEQButtonState() {
+  const eqOnBtn = document.getElementById("eqOnBtn")
+  const eqOffBtn = document.getElementById("eqOffBtn")
+
+  if (!eqOnBtn || !eqOffBtn) return
+
+  if (eqState) {
+    eqOnBtn.classList.remove("inactive")
+    eqOffBtn.classList.add("inactive")
+  } else {
+    eqOnBtn.classList.add("inactive")
+    eqOffBtn.classList.remove("inactive")
+  }
+}
     const volumeSlider = document.getElementById("volumeSlider")
     const volumeValue = document.getElementById("volumeValue")
     const eqContainer = document.getElementById("eqContainer")
@@ -389,8 +404,8 @@
     let eqEnabled = true
 
 function setEQ(state) {
-  eqEnabled = state
-  updateEQButtons()
+  eqState = state
+  updateEQButtonState()
 
   if (!filterNode) return
   filterNode.gain.value = state ? boostAmount : 0
@@ -494,8 +509,7 @@ function setEQ(state) {
   <button id="eqOffBtn" onclick="setEQ(false)">EQ OFF</button>
   <button id="eqOnBtn" onclick="setEQ(true)">EQ ON</button>
 `
-eqEnabled = true
-updateEQButtons()
+updateEQButtonState()
       }
 
       updateModeButtons()
