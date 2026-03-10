@@ -5,10 +5,86 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
+    #volumeSlider{
+  width:220px;
+  height:18px;
+  accent-color:#2d6a4f;
+  cursor:pointer;
+  vertical-align:middle;
+}
+
+#volumeValue{
+  display:inline-block;
+  min-width:24px;
+  font-weight:700;
+  font-size:18px;
+}
+
+#volumeSlider::-webkit-slider-thumb{
+  width:24px;
+  height:24px;
+}
+
+#volumeSlider::-webkit-slider-runnable-track{
+  height:18px;
+}
+    .eq-toggle-wrap{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin:8px;
+  vertical-align:middle;
+  user-select:none;
+}
+
+.eq-label{
+  font-size:16px;
+  font-weight:600;
+  color:#1b4332;
+  min-width:62px;
+  text-align:center;
+}
+
+.eq-switch{
+  position:relative;
+  width:68px;
+  height:36px;
+  border:none;
+  border-radius:999px;
+  background:#cfd8d3;
+  cursor:pointer;
+  padding:0;
+  transition:background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.eq-switch.on{
+  background:#2d6a4f;
+}
+
+.eq-switch-knob{
+  position:absolute;
+  top:50%;
+  left:4px;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:white;
+  transform:translateY(-50%);
+  transition:left 0.2s ease, transform 0.2s ease;
+  box-shadow:0 2px 6px rgba(0,0,0,0.18);
+}
+
+.eq-switch.on .eq-switch-knob{
+  left:calc(100% - 28px - 4px);
+}
     .mode-btn.inactive,
-    .level-btn.inactive{
-      opacity:0.35;
-    }
+.level-btn.inactive,
+button.inactive{
+  opacity:0.35;
+}
 
     body{
       margin:0;
@@ -130,8 +206,13 @@
     }
 
     .correct{
-      background:linear-gradient(to top,#40916c,#2d6a4f)!important;
-    }
+  outline:3px solid #2e8b57 !important;
+  outline-offset:1px;
+  box-shadow:0 0 0 3px rgba(46,139,87,0.18);
+  transform:scale(1.01);
+  position:relative;
+  z-index:1;
+}
 
     .wrong{
       background:linear-gradient(to top,#e63946,#b5172e)!important;
@@ -166,6 +247,9 @@
     }
 
     @media (max-width: 768px){
+    #volumeSlider{
+  width:180px;
+}
       h1{
         font-size:30px;
         padding:18px;
@@ -288,6 +372,7 @@
 
   <script>
     let eqState = true
+let pinkIsPlaying = false
     function updateEQButtonState() {
   const eqOnBtn = document.getElementById("eqOnBtn")
   const eqOffBtn = document.getElementById("eqOffBtn")
@@ -401,16 +486,6 @@
       return audioReady
     }
 
-    let eqEnabled = true
-
-function setEQ(state) {
-  eqState = state
-  updateEQButtonState()
-
-  if (!filterNode) return
-  filterNode.gain.value = state ? boostAmount : 0
-}
-
     volumeSlider.oninput = function () {
       volumeValue.innerText = this.value
 
@@ -504,12 +579,20 @@ function setEQ(state) {
       } else {
         controlArea.innerHTML = `
   <button onclick="newQuestion()">Next</button>
-  <button onclick="stopAllAudio()">Stop</button>
-  <button onclick="startPink()">Play</button>
-  <button id="eqOffBtn" onclick="setEQ(false)">EQ OFF</button>
-  <button id="eqOnBtn" onclick="setEQ(true)">EQ ON</button>
+  <button id="stopBtn" onclick="handleStopPink()">⏹ Stop</button>
+  <button id="playBtn" onclick="handlePlayPink()">▶ Play</button>
+  <div class="eq-toggle-wrap">
+    <span class="eq-label">EQ OFF</span>
+    <button id="eqSwitch" class="eq-switch on" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="true" type="button">
+      <span class="eq-switch-knob"></span>
+    </button>
+    <span class="eq-label">EQ ON</span>
+  </div>
 `
-updateEQButtonState()
+pinkIsPlaying = false
+eqState = false
+updateTransportButtons()
+updateEQSwitch()
       }
 
       updateModeButtons()
@@ -528,7 +611,17 @@ updateEQButtonState()
     eqOffBtn.classList.remove("inactive")
   }
 }
+async function handleStopPink() {
+  await stopAllAudio()
+  pinkIsPlaying = false
+  updateTransportButtons()
+}
 
+async function handlePlayPink() {
+  await startPink()
+  pinkIsPlaying = true
+  updateTransportButtons()
+}
     async function newQuestion() {
       if (!await ensureAudioRunning()) return
 
@@ -549,11 +642,18 @@ updateEQButtonState()
       currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
 
       if (mode === 1) {
-        await playSine(currentFrequency)
-        return
-      }
+  await playSine(currentFrequency)
+  return
+}
 
-      sourceNode = createPinkNoise(audioContext)
+eqState = false
+pinkIsPlaying = true
+updateEQSwitch()
+updateTransportButtons()
+
+sourceNode = createPinkNoise(audioContext)
+
+
 
       filterNode = audioContext.createBiquadFilter()
       filterNode.type = "peaking"
@@ -567,7 +667,7 @@ updateEQButtonState()
       if (mode === 3) boostAmount = -9
       if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
 
-      filterNode.gain.value = eqEnabled ? boostAmount : 0
+      filterNode.gain.value = eqState ? boostAmount : 0
 
       const compensationDb = getPinkCompensationDb()
       const compensatedVolume =
@@ -600,7 +700,7 @@ updateEQButtonState()
       if (level === 2) filterNode.Q.value = 2.1
       if (level === 3) filterNode.Q.value = 4.3
 
-      filterNode.gain.value = eqEnabled ? boostAmount : 0
+      filterNode.gain.value = eqState ? boostAmount : 0
 
       const compensationDb = getPinkCompensationDb()
       const compensatedVolume =
@@ -610,6 +710,9 @@ updateEQButtonState()
 
       sourceNode.connect(filterNode)
       filterNode.connect(masterGain)
+      pinkIsPlaying = true
+updateTransportButtons()
+updateEQSwitch()
     }
 
     async function playSine(freq) {
@@ -683,9 +786,9 @@ updateEQButtonState()
       } else {
         if (!await ensureAudioRunning()) return
         if (audioContext && filterNode) {
-          filterNode.frequency.value = freq
-          setEQ(true)
-        }
+  filterNode.frequency.value = freq
+  filterNode.gain.value = eqState ? boostAmount : 0
+}
       }
 
       if (!questionAnswered) {
@@ -746,16 +849,41 @@ updateEQButtonState()
         }
       })
     }
+function updateTransportButtons() {
+  const playBtn = document.getElementById("playBtn")
+  const stopBtn = document.getElementById("stopBtn")
 
-    function updateLevelButtons() {
-      document.querySelectorAll(".level-btn").forEach(btn => {
-        if (parseInt(btn.dataset.level) === level) {
-          btn.classList.remove("inactive")
-        } else {
-          btn.classList.add("inactive")
-        }
-      })
-    }
+  if (!playBtn || !stopBtn) return
+
+  if (pinkIsPlaying) {
+    playBtn.classList.add("inactive")
+    stopBtn.classList.remove("inactive")
+  } else {
+    playBtn.classList.remove("inactive")
+    stopBtn.classList.add("inactive")
+  }
+}
+
+function updateEQSwitch() {
+  const eqSwitch = document.getElementById("eqSwitch")
+  if (!eqSwitch) return
+
+  if (eqState) {
+    eqSwitch.classList.add("on")
+    eqSwitch.setAttribute("aria-pressed", "true")
+  } else {
+    eqSwitch.classList.remove("on")
+    eqSwitch.setAttribute("aria-pressed", "false")
+  }
+}
+
+function toggleEQ() {
+  eqState = !eqState
+  updateEQSwitch()
+
+  if (!filterNode) return
+  filterNode.gain.value = eqState ? boostAmount : 0
+}
 
     function updateScore() {
       let percent = 0
