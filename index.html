@@ -386,10 +386,15 @@
       return audioReady
     }
 
-    function setEQ(state) {
-      if (!filterNode) return
-      filterNode.gain.value = state ? boostAmount : 0
-    }
+    let eqEnabled = true
+
+function setEQ(state) {
+  eqEnabled = state
+  updateEQButtons()
+
+  if (!filterNode) return
+  filterNode.gain.value = state ? boostAmount : 0
+}
 
     volumeSlider.oninput = function () {
       volumeValue.innerText = this.value
@@ -483,16 +488,32 @@
         `
       } else {
         controlArea.innerHTML = `
-          <button onclick="newQuestion()">Next</button>
-          <button onclick="stopAllAudio()">Stop</button>
-          <button onclick="startPink()">Play</button>
-          <button onclick="setEQ(false)">EQ OFF</button>
-          <button onclick="setEQ(true)">EQ ON</button>
-        `
+  <button onclick="newQuestion()">Next</button>
+  <button onclick="stopAllAudio()">Stop</button>
+  <button onclick="startPink()">Play</button>
+  <button id="eqOffBtn" onclick="setEQ(false)">EQ OFF</button>
+  <button id="eqOnBtn" onclick="setEQ(true)">EQ ON</button>
+`
+eqEnabled = true
+updateEQButtons()
       }
 
       updateModeButtons()
     }
+    function updateEQButtons() {
+  const eqOnBtn = document.getElementById("eqOnBtn")
+  const eqOffBtn = document.getElementById("eqOffBtn")
+
+  if (!eqOnBtn || !eqOffBtn) return
+
+  if (eqEnabled) {
+    eqOnBtn.classList.remove("inactive")
+    eqOffBtn.classList.add("inactive")
+  } else {
+    eqOnBtn.classList.add("inactive")
+    eqOffBtn.classList.remove("inactive")
+  }
+}
 
     async function newQuestion() {
       if (!await ensureAudioRunning()) return
@@ -532,7 +553,7 @@
       if (mode === 3) boostAmount = -9
       if (mode === 4) boostAmount = Math.random() > 0.5 ? 9 : -9
 
-      filterNode.gain.value = boostAmount
+      filterNode.gain.value = eqEnabled ? boostAmount : 0
 
       const compensationDb = getPinkCompensationDb()
       const compensatedVolume =
@@ -565,7 +586,7 @@
       if (level === 2) filterNode.Q.value = 2.1
       if (level === 3) filterNode.Q.value = 4.3
 
-      filterNode.gain.value = boostAmount
+      filterNode.gain.value = eqEnabled ? boostAmount : 0
 
       const compensationDb = getPinkCompensationDb()
       const compensatedVolume =
