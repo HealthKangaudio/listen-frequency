@@ -330,7 +330,7 @@ button.inactive{
       min-width:220px;
       touch-action:manipulation;
     ">
-      Tap to Start Audio
+      Tap to Start Training
     </button>
   </div>
 
@@ -431,6 +431,7 @@ let pinkIsPlaying = false
     let questionAnswered = false
     let totalQuestions = 0
     let correctAnswers = 0
+    let hasStarted = false
 
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms))
@@ -561,9 +562,10 @@ let pinkIsPlaying = false
       await stopAllAudio()
 
       mode = m
-      resultText.innerText = ""
-      questionAnswered = false
-      clearBands()
+hasStarted = false
+resultText.innerText = "Choose a mode, then press Start."
+questionAnswered = false
+clearBands()
 
       correctAnswers = 0
       totalQuestions = 0
@@ -572,28 +574,28 @@ let pinkIsPlaying = false
       controlArea.innerHTML = ""
 
       if (mode === 1) {
-        controlArea.innerHTML = `
-          <button onclick="newQuestion()">Next</button>
-          <button onclick="replaySine()">Replay</button>
-        `
-      } else {
-        controlArea.innerHTML = `
-  <button onclick="newQuestion()">Next</button>
-  <button id="stopBtn" onclick="handleStopPink()">⏹ Stop</button>
-  <button id="playBtn" onclick="handlePlayPink()">▶ Play</button>
-  <div class="eq-toggle-wrap">
-    <span class="eq-label">EQ OFF</span>
-    <button id="eqSwitch" class="eq-switch on" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="true" type="button">
-      <span class="eq-switch-knob"></span>
-    </button>
-    <span class="eq-label">EQ ON</span>
-  </div>
-`
-pinkIsPlaying = false
-eqState = false
-updateTransportButtons()
-updateEQSwitch()
-      }
+  controlArea.innerHTML = `
+    <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+    <button onclick="replaySine()">Replay</button>
+  `
+} else {
+  controlArea.innerHTML = `
+    <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+    <button id="stopBtn" onclick="handleStopPink()">⏹ Stop</button>
+    <button id="playBtn" onclick="handlePlayPink()">▶ Play</button>
+    <div class="eq-toggle-wrap">
+      <span class="eq-label">EQ OFF</span>
+      <button id="eqSwitch" class="eq-switch on" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="true" type="button">
+        <span class="eq-switch-knob"></span>
+      </button>
+      <span class="eq-label">EQ ON</span>
+    </div>
+  `
+  pinkIsPlaying = false
+  eqState = false
+  updateTransportButtons()
+  updateEQSwitch()
+}
 
       updateModeButtons()
     }
@@ -624,6 +626,13 @@ async function handlePlayPink() {
 }
     async function newQuestion() {
       if (!await ensureAudioRunning()) return
+
+      hasStarted = true
+
+const questionBtn = document.getElementById("questionBtn")
+if (questionBtn) {
+  questionBtn.innerText = "Next"
+}
 
       await stopAllAudio()
       await sleep(70)
@@ -963,6 +972,7 @@ function toggleEQ() {
     updateModeButtons()
     updateLevelButtons()
     updateScore()
+    resultText.innerText = "Choose a mode, then press Start."
   </script>
 </body>
 </html>
