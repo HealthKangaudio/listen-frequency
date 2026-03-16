@@ -5,15 +5,43 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
+    #characterSection{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
 
-    #characterGrid{
+#characterGrid{
   display:grid;
   grid-template-columns:repeat(4, 120px);
   gap:14px;
-  width:fit-content;
+  width:max-content;
   margin:0 auto;
-  justify-items:center;
-  align-items:stretch;
+  justify-content:center;
+  align-content:center;
+}
+
+.character-card{
+  width:120px;
+  height:120px;
+  background:hsl(212, 85%, 87%);
+  border:3px solid transparent;
+  border-radius:16px;
+  padding:8px;
+  cursor:pointer;
+  transition:transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.character-card img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
 }
     #modeSection{
   width:100%;
@@ -143,15 +171,6 @@
   text-align:center;
   box-shadow:0 4px 12px rgba(0,0,0,0.12);
   word-break:break-word;
-}
-#characterGrid{
-  display:grid;
-  grid-template-columns:repeat(4, 120px);
-  gap:14px;
-  width:fit-content;
-  margin:0 auto;
-  justify-content:center;
-  align-items:stretch;
 }
 
 .character-card{
