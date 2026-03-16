@@ -5,6 +5,209 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
+
+    #modeSection{
+  width:100%;
+  position:relative;
+  padding-top:0;
+}
+
+#modeHeader{
+  position:relative;
+  width:100%;
+  margin-bottom:2px;
+  min-height:0;
+}
+
+#modeTitle{
+  margin:0 0 2px 0;
+  text-align:center;
+}
+
+#playerBadge{
+  position:absolute;
+  top:0;
+  right:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+
+#modeSection{
+  width:100%;
+}
+
+#modeHeader{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:start;
+  margin-bottom:2px;
+}
+
+#modeTitle{
+  grid-column:2;
+  margin:0 0 2px 0;
+  text-align:center;
+}
+
+#playerBadge{
+  grid-column:3;
+  justify-self:end;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+
+#trainingPanel h3{
+  margin:0 0 10px 0;
+  text-align:center;
+}
+
+#modeTitle{
+  margin:0 0 2px 0;
+}
+
+.mode-button-group .mode-btn{
+  white-space:nowrap;
+}
+    .mode-button-group{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+}
+
+.mode-row-break{
+  flex-basis:100%;
+  height:0;
+}
+    
+    #trainingPanel{
+  width:99%;
+  max-width:1920px;
+  box-sizing:border-box;
+}
+
+#playerBadgeFrame{
+  width:150px;
+  height:150px;
+  padding:3px;
+  border-radius:20px;
+  background:linear-gradient(
+    135deg,
+    #ff0000,
+    #ff7a00,
+    #ffd500,
+    #33cc33,
+    #00cfff,
+    #4b5cff,
+    #9b4dff,
+    #ff4db8
+  );
+  box-shadow:0 6px 18px rgba(0,0,0,0.16);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#playerBadgeImg{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  border-radius:17px;
+  background:white;
+  display:block;
+}
+
+#playerBadgeName{
+  min-width:108px;
+  padding:7px 11px;
+  border-radius:12px;
+  background:rgba(27,67,50,0.92);
+  color:white;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.12);
+  word-break:break-word;
+}
+#characterGrid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(120px, 1fr));
+  gap:14px;
+  justify-content:center;
+  align-items:stretch;
+  margin:0 auto;
+  max-width:760px;
+}
+
+.character-card{
+  background:hsl(212, 85%, 87%);
+  border:3px solid transparent;
+  border-radius:16px;
+  padding:8px;
+  cursor:pointer;
+  transition:transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  box-sizing:border-box;
+  aspect-ratio:1 / 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.character-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}
+
+.character-card.inactive{
+  opacity:0.4;
+}
+
+.character-card.selected{
+  border-color:#74c69d;
+  box-shadow:0 0 0 3px rgba(116,198,157,0.22);
+}
+
+.character-card img{
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:contain;
+  display:block;
+}
+
+
+@media (max-width: 768px){
+  #characterGrid{
+    grid-template-columns:repeat(2, minmax(120px, 1fr));
+    gap:12px;
+    max-width:360px;
+  }
+
+  .character-card img{
+    max-width:84px;
+    height:84px;
+  }
+
+}
+
+    .category-btn.inactive{
+  opacity:0.35;
+}
+
+.category-btn{
+  background:#40916c;
+}
+
+.category-btn:hover{
+  background:#1b4332;
+}
     #volumeSlider{
   width:220px;
   height:18px;
@@ -81,9 +284,17 @@
   left:calc(100% - 28px - 4px);
 }
     .mode-btn.inactive,
-.level-btn.inactive,
+.octave-btn.inactive,
+.gain-btn.inactive,
 button.inactive{
   opacity:0.35;
+}
+.gain-btn{
+  background:#577590;
+}
+
+.gain-btn:hover{
+  background:#3d5a80;
 }
 
     body{
@@ -145,23 +356,51 @@ button.inactive{
       background:#d62828;
     }
 
+    .octave-btn{
+  background:#577590;
+}
+
+.octave-btn:hover{
+  background:#3d5a80;
+}
+
+.gain-btn[data-gain="6"]{
+  background:#c55b14;
+  color:white;
+}
+
+.gain-btn[data-gain="6"]:hover{
+  background:#c55b14;
+  color:white;
+}
+
+.gain-btn[data-gain="9"]{
+  background:#7f9216;
+  color:white;
+}
+
+.gain-btn[data-gain="9"]:hover{
+  background:#7f9216;
+  color:white;
+}
+
     .eq-container{
-      display:flex;
-      justify-content:center;
-      align-items:flex-end;
-      gap:8px;
-      margin:24px auto 0;
-      flex-wrap:nowrap;
-      overflow-x:auto;
-      overflow-y:hidden;
-      padding:8px 4px 14px;
-      box-sizing:border-box;
-      width:max-content;
-      max-width:100%;
-      scrollbar-gutter: stable;
-      scrollbar-width:auto;
-      scrollbar-color:#2d6a4f #d7e7de;
-    }
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  gap:8px;
+  margin:24px auto 0;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:8px 8px 14px;
+  box-sizing:border-box;
+  width:100%;
+  max-width:100%;
+  scrollbar-gutter: stable;
+  scrollbar-width:auto;
+  scrollbar-color:#2d6a4f #d7e7de;
+}
 
     .eq-container::-webkit-scrollbar{
       height:12px;
@@ -247,6 +486,35 @@ button.inactive{
     }
 
     @media (max-width: 768px){
+
+      #playerBadgeName{
+    min-width:82px;
+    font-size:12px;
+    padding:6px 9px;
+  }
+  @media (max-width: 768px){
+  #playerBadge{
+    position:static;
+    margin:0 auto 8px;
+  }
+
+  #modeHeader{
+    margin-bottom:2px;
+  }
+
+  #modeTitle{
+    margin:0 0 4px 0;
+  }
+}
+  #playerBadgeFrame{
+    width:82px;
+    height:82px;
+    border-radius:18px;
+    padding:3px;
+  }
+  #playerBadgeImg{
+    border-radius:15px;
+  }
     #volumeSlider{
   width:180px;
 }
@@ -308,52 +576,106 @@ button.inactive{
 </head>
 
 <body>
-  <div id="audioStartOverlay" style="
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.75);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    touch-action:manipulation;
-  ">
-    <button id="audioStartButton" type="button" style="
-      font-size:24px;
-      padding:20px 30px;
-      border-radius:16px;
-      border:none;
-      background:#2d6a4f;
-      color:white;
-      font-family:'Orbitron', sans-serif;
-      min-height:56px;
-      min-width:220px;
-      touch-action:manipulation;
-    ">
-      Tap to Start Training
-    </button>
+  
+<div id="introScreen" class="panel" style="max-width:700px; margin-top:40px;">
+  <h2>Start Training</h2>
+  <p id="introGuide">Enter your nickname and choose your category.</p>
+
+  <div style="margin:20px 0;">
+    <input
+      type="text"
+      id="nicknameInput"
+      placeholder="Enter your nickname"
+      maxlength="12"
+      style="
+        width:80%;
+        max-width:320px;
+        padding:14px 16px;
+        font-size:16px;
+        border:2px solid #b7d3c2;
+        border-radius:12px;
+        box-sizing:border-box;
+      "
+    >
   </div>
 
+  <div id="categoryArea" style="margin:18px 0 10px;">
+  <button class="category-btn" data-category="Musician" onclick="selectCategory('Musician')">Musician</button>
+  <button class="category-btn" data-category="Audio Engineer" onclick="selectCategory('Audio Engineer')">Audio Engineer</button>
+  <button class="category-btn" data-category="Consumer" onclick="selectCategory('Consumer')">Consumer</button>
+</div>
+
+<div id="characterSection" style="margin:24px 0 10px;">
+  <h3 style="margin-bottom:14px;">Choose Character</h3>
+  <div id="characterGrid"></div>
+</div>
+
+<div style="margin-top:24px;">
+  <button id="startTrainingBtn" onclick="startTraining()">Start Training</button>
+</div>
+</div>
   <h1>Listen Frequency</h1>
 
-  <div class="panel">
+  <div class="panel" id="trainingPanel" style="display:none;">
 
-    <h3>🎛 Mode</h3>
+  <div id="modeSection">
+  <div id="modeHeader">
+    <h3 id="modeTitle">🎵 Mode</h3>
 
-    <button class="mode-btn" data-mode="1" onclick="selectMode(1)">1. Sine Wave</button>
-    <button class="mode-btn" data-mode="2" onclick="selectMode(2)">2. Pink Boost</button>
-    <button class="mode-btn" data-mode="3" onclick="selectMode(3)">3. Pink Cut</button>
-    <button class="mode-btn" data-mode="4" onclick="selectMode(4)">4. Pink Random</button>
+    <div id="playerBadge" style="display:none;">
+      <div id="playerBadgeFrame">
+        <img id="playerBadgeImg" src="" alt="character">
+      </div>
+      <div id="playerBadgeName">PLAYER</div>
+    </div>
+  </div>
 
-    <h3>🎚 Level</h3>
+  <div class="mode-button-group">
+      <button class="mode-btn" data-mode="1" onclick="selectMode(1)">1. Sine Wave</button>
+      <button class="mode-btn" data-mode="2" onclick="selectMode(2)">2. Pink Boost</button>
+      <button class="mode-btn" data-mode="3" onclick="selectMode(3)">3. Pink Cut</button>
+      <button class="mode-btn" data-mode="4" onclick="selectMode(4)">4. Pink Random</button>
 
-    <button class="level-btn" data-level="1" onclick="setLevel(1)">Level.1 1 Octave</button>
-    <button class="level-btn" data-level="2" onclick="setLevel(2)">Level.2 2/3 Octave</button>
-    <button class="level-btn" data-level="3" onclick="setLevel(3)">Level.3 1/3 Octave</button>
+      <div class="mode-row-break"></div>
+
+      <button class="mode-btn" data-mode="5" onclick="selectMode(5)">5. Music Boost</button>
+      <button class="mode-btn" data-mode="6" onclick="selectMode(6)">6. Music Cut</button>
+      <button class="mode-btn" data-mode="7" onclick="selectMode(7)">7. Music Random</button>
+    </div>
+    </div>
+
+    <h3>📶 Octave</h3>
+
+    <button class="octave-btn" data-level="1" onclick="setLevel(1)">1 Octave</button>
+<button class="octave-btn" data-level="2" onclick="setLevel(2)">2/3 Octave</button>
+<button class="octave-btn" data-level="3" onclick="setLevel(3)">1/3 Octave</button>
+
+<div id="gainArea" style="display:none;">
+  <h3>⚡ Gain</h3>
+  <button class="gain-btn" data-gain="9" onclick="setGainMode(9)">Easy ( ± 9 dB )</button>
+  <button class="gain-btn" data-gain="6" onclick="setGainMode(6)">Hard ( ± 6 dB )</button>
+</div>
 
     <hr style="margin:30px 0">
 
     <div id="controlArea"></div>
+    <div id="musicUploadArea" style="display:none; margin:20px 0;">
+  <p id="musicUploadGuide" style="margin-bottom:6px; font-weight:600; font-size:13px;">
+    Supported files: MP3, WAV, M4A, AAC
+  </p>
+  <div style="margin-top:4px; font-size:12px; color:#4b6358;">
+    Your audio file is not shared or stored in a database.
+  </div>
+
+  <input
+    type="file"
+    id="musicFileInput"
+    accept=".mp3,.wav,.m4a,.aac,audio/*"
+    style="margin:10px 0;"
+  >
+
+  <div id="musicFileName" style="margin-top:8px; font-size:14px; font-weight:600;"></div>
+</div>
 
     <br>
 
@@ -370,7 +692,9 @@ button.inactive{
     </div>
   </div>
 
-  <script>
+  <script> 
+
+  
     let eqState = true
 let pinkIsPlaying = false
     function updateEQButtonState() {
@@ -393,8 +717,9 @@ let pinkIsPlaying = false
     const resultText = document.getElementById("result")
     const controlArea = document.getElementById("controlArea")
     const feedbackImg = document.getElementById("feedbackImg")
-    const audioStartOverlay = document.getElementById("audioStartOverlay")
-    const audioStartButton = document.getElementById("audioStartButton")
+    const musicUploadArea = document.getElementById("musicUploadArea")
+const musicFileInput = document.getElementById("musicFileInput")
+const musicFileName = document.getElementById("musicFileName")
 
     let audioContext = null
     let masterGain = null
@@ -402,18 +727,17 @@ let pinkIsPlaying = false
     let audioReady = false
 
     const freq13 = [
-      63,80,100,125,160,200,250,315,
-      400,500,630,800,1000,1250,1600,
-      2000,2500,3150,4000,5000,6300,
-      8000,10000,12500,16000
-    ]
+  20,25,31.5,40,50,63,80,100,125,160,
+  200,250,315,400,500,630,800,1000,1250,1600,
+  2000,2500,3150,4000,5000,6300,8000,10000,12500,16000,20000
+]
 
-    const freq23 = [
-      63,100,160,250,400,630,
-      1000,1600,2500,4000,6300,10000,16000
-    ]
+const freq23 = [
+  25,40,63,100,160,250,400,630,
+  1000,1600,2500,4000,6300,10000,16000
+]
 
-    const freqOct = [63,125,250,500,1000,2000,4000,8000,16000]
+const freqOct = [31.5,63,125,250,500,1000,2000,4000,8000,16000]
 
     let level = 3
     let activeFreqs = freq13
@@ -421,17 +745,160 @@ let pinkIsPlaying = false
     let mode = null
     let currentFrequency = null
     let boostAmount = 12
+    let gainMode = 9
 
     let sourceNode = null
     let filterNode = null
 
     let sineOsc = null
     let sineGain = null
+    let musicSourceNode = null
+let musicGain = null
+let musicFilterNode = null
 
     let questionAnswered = false
+let playerNickname = ""
+let playerCategory = ""
+let playerCharacter = ""
+let trainingStarted = false
     let totalQuestions = 0
     let correctAnswers = 0
     let hasStarted = false
+
+const STORAGE_CHARACTER_KEY = "listen_frequency_character"
+    const STORAGE_NICKNAME_KEY = "listen_frequency_nickname"
+const STORAGE_CATEGORY_KEY = "listen_frequency_category"
+let uploadedAudioBuffer = null
+let uploadedAudioName = ""
+const characters = [
+  { id: "golden", name: "Golden", file: "characters/golden_trumpet.png" },
+  { id: "trex", name: "T-Rex", file: "characters/trex_drums.png" },
+  { id: "munchkin", name: "Munchkin", file: "characters/munchkin_keyboard.png" },
+  { id: "bear", name: "Bear", file: "characters/brown_bear_boombox.png" },
+  { id: "lion", name: "Lion", file: "characters/lion_conductor.png" },
+  { id: "dolphin", name: "Dolphin", file: "characters/dolphin_mic.png" },
+  { id: "penguin", name: "Penguin", file: "characters/penguin_headphones.png" },
+  { id: "honeybadger", name: "Honey Badger", file: "characters/honeybadger_guitar.png" }
+]
+
+function savePlayerProfile() {
+  localStorage.setItem(STORAGE_NICKNAME_KEY, playerNickname)
+  localStorage.setItem(STORAGE_CATEGORY_KEY, playerCategory)
+  localStorage.setItem(STORAGE_CHARACTER_KEY, playerCharacter)
+}
+function loadPlayerProfile() {
+  const savedNickname = localStorage.getItem(STORAGE_NICKNAME_KEY) || ""
+  const savedCategory = localStorage.getItem(STORAGE_CATEGORY_KEY) || ""
+  const savedCharacter = localStorage.getItem(STORAGE_CHARACTER_KEY) || ""
+
+  if (savedNickname) {
+    playerNickname = savedNickname
+    const nicknameInput = document.getElementById("nicknameInput")
+    if (nicknameInput) {
+      nicknameInput.value = playerNickname
+    }
+  }
+
+  if (savedCategory) {
+    playerCategory = savedCategory
+    selectCategory(playerCategory)
+  }
+
+  if (savedCharacter) {
+    playerCharacter = savedCharacter
+    selectCharacter(playerCharacter)
+  }
+}
+    async function startTraining() {
+  const nicknameInput = document.getElementById("nicknameInput")
+  const introGuide = document.getElementById("introGuide")
+  const introScreen = document.getElementById("introScreen")
+  const trainingPanel = document.getElementById("trainingPanel")
+  const playerBadge = document.getElementById("playerBadge")
+
+  const nickname = nicknameInput.value.trim()
+
+  if (!nickname) {
+    introGuide.innerText = "Please enter your nickname."
+    return
+  }
+
+  if (!playerCategory) {
+    introGuide.innerText = "Please choose your category."
+    return
+  }
+if (!playerCharacter) {
+  introGuide.innerText = "Please choose your character."
+  return
+}
+  let webAudioOk = false
+
+  try {
+    webAudioOk = await initAudio()
+  } catch (err) {
+    console.error("initAudio failed:", err)
+  }
+
+  if (!webAudioOk) {
+    introGuide.innerText = "Audio could not be started. Please try again."
+    return
+  }
+
+  playerNickname = nickname
+  trainingStarted = true
+  audioReady = true
+
+  savePlayerProfile()
+
+  const playerBadgeImg = document.getElementById("playerBadgeImg")
+const playerBadgeName = document.getElementById("playerBadgeName")
+const selectedCharacter = characters.find(character => character.id === playerCharacter)
+
+if (selectedCharacter && playerBadgeImg) {
+  playerBadgeImg.src = selectedCharacter.file
+}
+
+if (playerBadgeName) {
+  playerBadgeName.innerText = playerNickname
+}
+
+playerBadge.style.display = "flex"
+
+  introScreen.style.display = "none"
+  trainingPanel.style.display = "block"
+
+  resultText.innerText = "Choose a mode, then press Start."
+}
+
+function selectCategory(category) {
+  playerCategory = category
+
+  document.querySelectorAll(".category-btn").forEach(btn => {
+    if (btn.dataset.category === category) {
+      btn.classList.remove("inactive")
+    } else {
+      btn.classList.add("inactive")
+    }
+  })
+}
+
+function renderCharacterCards() {
+  const characterGrid = document.getElementById("characterGrid")
+  if (!characterGrid) return
+
+  characterGrid.innerHTML = characters.map(character => `
+  <div class="character-card ${playerCharacter === character.id ? "selected" : ""} ${playerCharacter && playerCharacter !== character.id ? "inactive" : ""}"
+       data-character-id="${character.id}"
+       onclick="selectCharacter('${character.id}')">
+    <img src="${character.file}" alt="${character.name}">
+  </div>
+`).join("")
+}
+
+function selectCharacter(characterId) {
+  playerCharacter = characterId
+  renderCharacterCards()
+}
 
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms))
@@ -498,50 +965,82 @@ let pinkIsPlaying = false
     }
 
     async function stopAllAudio() {
-      if (!audioContext) return
+  if (!audioContext) return
 
-      const oldSineGain = sineGain
-      const oldSineOsc = sineOsc
-      const oldFilterNode = filterNode
-      const oldSourceNode = sourceNode
+  const oldSineGain = sineGain
+  const oldSineOsc = sineOsc
+  const oldFilterNode = filterNode
+  const oldSourceNode = sourceNode
 
-      sineGain = null
-      sineOsc = null
-      filterNode = null
-      sourceNode = null
+  const oldMusicSourceNode = musicSourceNode
+  const oldMusicGain = musicGain
+  const oldMusicFilterNode = musicFilterNode
 
-      const now = audioContext.currentTime
-      const fadeEnd = now + 0.03
+  sineGain = null
+  sineOsc = null
+  filterNode = null
+  sourceNode = null
 
-      if (oldSineGain) {
-        try {
-          oldSineGain.gain.cancelScheduledValues(now)
-          oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
-          oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
-        } catch (e) {}
-      }
+  musicSourceNode = null
+  musicGain = null
+  musicFilterNode = null
 
-      if (oldSineOsc) {
-        try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
-      }
+  const now = audioContext.currentTime
+  const fadeEnd = now + 0.03
 
-      if (oldSourceNode) {
-        try { oldSourceNode.stop(now + 0.03) } catch (e) {}
-      }
+  if (oldSineGain) {
+    try {
+      oldSineGain.gain.cancelScheduledValues(now)
+      oldSineGain.gain.setValueAtTime(oldSineGain.gain.value, now)
+      oldSineGain.gain.linearRampToValueAtTime(0, fadeEnd)
+    } catch (e) {}
+  }
 
-      setTimeout(() => {
-        if (oldSineGain) {
-          try { oldSineGain.disconnect() } catch (e) {}
-        }
-        if (oldFilterNode) {
-          try { oldFilterNode.disconnect() } catch (e) {}
-        }
-        if (oldSourceNode) {
-          try { oldSourceNode.disconnect() } catch (e) {}
-        }
-      }, 80)
+  if (oldSineOsc) {
+    try { oldSineOsc.stop(fadeEnd + 0.01) } catch (e) {}
+  }
+
+  if (oldSourceNode) {
+    try { oldSourceNode.stop(now + 0.03) } catch (e) {}
+  }
+
+  if (oldMusicSourceNode) {
+    try { oldMusicSourceNode.stop(now + 0.03) } catch (e) {}
+  }
+
+  setTimeout(() => {
+    if (oldSineGain) {
+      try { oldSineGain.disconnect() } catch (e) {}
+    }
+    if (oldFilterNode) {
+      try { oldFilterNode.disconnect() } catch (e) {}
+    }
+    if (oldSourceNode) {
+      try { oldSourceNode.disconnect() } catch (e) {}
     }
 
+    if (oldMusicGain) {
+      try { oldMusicGain.disconnect() } catch (e) {}
+    }
+    if (oldMusicFilterNode) {
+      try { oldMusicFilterNode.disconnect() } catch (e) {}
+    }
+    if (oldMusicSourceNode) {
+      try { oldMusicSourceNode.disconnect() } catch (e) {}
+    }
+  }, 80)
+}
+async function handlePlayMusic() {
+  await playUploadedMusic()
+  pinkIsPlaying = true
+  updateTransportButtons()
+}
+
+async function handleStopMusic() {
+  await stopAllAudio()
+  pinkIsPlaying = false
+  updateTransportButtons()
+}
     function setLevel(l) {
       level = l
 
@@ -555,62 +1054,144 @@ let pinkIsPlaying = false
       updateBandDisplay()
       updateLevelButtons()
     }
-
-    async function selectMode(m) {
-      if (!audioReady) return
-
-      await stopAllAudio()
-
-      mode = m
-hasStarted = false
-resultText.innerText = "Choose a mode, then press Start."
-questionAnswered = false
-clearBands()
-
-      correctAnswers = 0
-      totalQuestions = 0
-      updateScore()
-
-      controlArea.innerHTML = ""
-
-      if (mode === 1) {
-  controlArea.innerHTML = `
-    <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
-    <button onclick="replaySine()">Replay</button>
-  `
-} else {
-  controlArea.innerHTML = `
-    <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
-    <button id="stopBtn" onclick="handleStopPink()">⏹ Stop</button>
-    <button id="playBtn" onclick="handlePlayPink()">▶ Play</button>
-    <div class="eq-toggle-wrap">
-      <span class="eq-label">EQ OFF</span>
-      <button id="eqSwitch" class="eq-switch on" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="true" type="button">
-        <span class="eq-switch-knob"></span>
-      </button>
-      <span class="eq-label">EQ ON</span>
-    </div>
-  `
-  pinkIsPlaying = false
-  eqState = false
-  updateTransportButtons()
-  updateEQSwitch()
+function setGainMode(value) {
+  gainMode = value
+  updateGainButtons()
 }
 
-      updateModeButtons()
+function updateGainButtons() {
+  document.querySelectorAll(".gain-btn").forEach(btn => {
+    if (parseInt(btn.dataset.gain) === gainMode) {
+      btn.classList.remove("inactive")
+    } else {
+      btn.classList.add("inactive")
     }
-    function updateEQButtons() {
-  const eqOnBtn = document.getElementById("eqOnBtn")
-  const eqOffBtn = document.getElementById("eqOffBtn")
+  })
+}
+    async function selectMode(m) {
+  if (!audioReady) return
 
-  if (!eqOnBtn || !eqOffBtn) return
+  await stopAllAudio()
 
-  if (eqEnabled) {
-    eqOnBtn.classList.remove("inactive")
-    eqOffBtn.classList.add("inactive")
-  } else {
-    eqOnBtn.classList.add("inactive")
-    eqOffBtn.classList.remove("inactive")
+  mode = m
+  hasStarted = false
+
+  const gainArea = document.getElementById("gainArea")
+if (gainArea) {
+  gainArea.style.display = (mode === 1) ? "none" : "block"
+}
+
+  if (mode === 5 || mode === 6 || mode === 7) {
+  resultText.innerText = "Upload your track, then press Start."
+} else {
+  resultText.innerText = "Choose a mode, then press Start."
+}
+
+  questionAnswered = false
+  clearBands()
+
+  musicUploadArea.style.display = (mode === 5 || mode === 6 || mode === 7) ? "block" : "none"
+
+  correctAnswers = 0
+  totalQuestions = 0
+  updateScore()
+
+  controlArea.innerHTML = ""
+
+  if (mode === 1) {
+    controlArea.innerHTML = `
+      <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+      <button onclick="replaySine()">Replay</button>
+    `
+  } else if (mode >= 2 && mode <= 4) {
+    controlArea.innerHTML = `
+      <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+      <button id="stopBtn" onclick="handleStopPink()">⏹ Stop</button>
+      <button id="playBtn" onclick="handlePlayPink()">▶ Play</button>
+      <div class="eq-toggle-wrap">
+        <span class="eq-label">EQ OFF</span>
+        <button id="eqSwitch" class="eq-switch" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="false" type="button">
+          <span class="eq-switch-knob"></span>
+        </button>
+        <span class="eq-label">EQ ON</span>
+      </div>
+    `
+    pinkIsPlaying = false
+    eqState = false
+    updateTransportButtons()
+    updateEQSwitch()
+  } else if (mode === 5 || mode === 6 || mode === 7) {
+    controlArea.innerHTML = `
+      <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+      <button id="stopBtn" onclick="handleStopMusic()">⏹ Stop</button>
+      <button id="playBtn" onclick="handlePlayMusic()">▶ Play</button>
+      <div class="eq-toggle-wrap">
+        <span class="eq-label">EQ OFF</span>
+        <button id="eqSwitch" class="eq-switch" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="false" type="button">
+          <span class="eq-switch-knob"></span>
+        </button>
+        <span class="eq-label">EQ ON</span>
+      </div>
+    `
+    pinkIsPlaying = false
+    eqState = false
+    updateTransportButtons()
+    updateEQSwitch()
+  }
+
+  updateModeButtons()
+}
+async function playUploadedMusic() {
+  if (!uploadedAudioBuffer) {
+    resultText.innerText = "Please upload an audio file first."
+    return
+  }
+
+  createContext()
+  await ensureAudioRunning()
+  await stopAllAudio()
+
+  const now = audioContext.currentTime
+
+  musicSourceNode = audioContext.createBufferSource()
+  musicSourceNode.buffer = uploadedAudioBuffer
+
+  musicGain = audioContext.createGain()
+  musicGain.gain.setValueAtTime(1, now)
+
+  musicFilterNode = audioContext.createBiquadFilter()
+  musicFilterNode.type = "peaking"
+  musicFilterNode.frequency.value = currentFrequency || 1000
+  musicFilterNode.gain.value = eqState ? boostAmount : 0
+
+  if (level === 1) musicFilterNode.Q.value = 1.4
+  if (level === 2) musicFilterNode.Q.value = 2.1
+  if (level === 3) musicFilterNode.Q.value = 4.3
+
+  musicSourceNode.connect(musicFilterNode)
+  musicFilterNode.connect(musicGain)
+  musicGain.connect(masterGain)
+
+  musicSourceNode.start(now)
+}
+    async function handleMusicFileUpload(file) {
+  if (!file) return
+
+  try {
+    createContext()
+    await ensureAudioRunning()
+
+    const arrayBuffer = await file.arrayBuffer()
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+
+    uploadedAudioBuffer = audioBuffer
+    uploadedAudioName = file.name
+    musicFileName.innerText = "Loaded: " + uploadedAudioName
+  } catch (err) {
+    console.error("Audio file load failed:", err)
+    uploadedAudioBuffer = null
+    uploadedAudioName = ""
+    musicFileName.innerText = "Failed to load audio file."
   }
 }
 async function handleStopPink() {
@@ -652,6 +1233,58 @@ if (questionBtn) {
 
       if (mode === 1) {
   await playSine(currentFrequency)
+  return
+}
+
+if (mode >= 2 && mode <= 4) {
+  eqState = false
+  pinkIsPlaying = true
+  updateEQSwitch()
+  updateTransportButtons()
+
+  sourceNode = createPinkNoise(audioContext)
+
+  filterNode = audioContext.createBiquadFilter()
+  filterNode.type = "peaking"
+  filterNode.frequency.value = currentFrequency
+
+  if (level === 1) filterNode.Q.value = 1.4
+  if (level === 2) filterNode.Q.value = 2.1
+  if (level === 3) filterNode.Q.value = 4.3
+
+  if (mode === 2) boostAmount = gainMode
+if (mode === 3) boostAmount = -gainMode
+if (mode === 4) boostAmount = Math.random() > 0.5 ? gainMode : -gainMode
+
+  filterNode.gain.value = eqState ? boostAmount : 0
+
+  const compensationDb = getPinkCompensationDb()
+  const compensatedVolume =
+    (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
+
+  masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+
+  sourceNode.connect(filterNode)
+  filterNode.connect(masterGain)
+  return
+}
+
+if (mode === 5 || mode === 6 || mode === 7) {
+  if (!uploadedAudioBuffer) {
+    resultText.innerText = "Please upload an audio file first."
+    return
+  }
+
+  if (mode === 5) boostAmount = gainMode
+if (mode === 6) boostAmount = -gainMode
+if (mode === 7) boostAmount = Math.random() > 0.5 ? gainMode : -gainMode
+
+  eqState = false
+  pinkIsPlaying = true
+  updateTransportButtons()
+  updateEQSwitch()
+
+  await playUploadedMusic()
   return
 }
 
@@ -794,9 +1427,16 @@ updateEQSwitch()
         await playSine(freq)
       } else {
         if (!await ensureAudioRunning()) return
-        if (audioContext && filterNode) {
-  filterNode.frequency.value = freq
-  filterNode.gain.value = eqState ? boostAmount : 0
+        if (audioContext) {
+  if (filterNode) {
+    filterNode.frequency.value = freq
+    filterNode.gain.value = eqState ? boostAmount : 0
+  }
+
+  if (musicFilterNode) {
+    musicFilterNode.frequency.value = freq
+    musicFilterNode.gain.value = eqState ? boostAmount : 0
+  }
 }
       }
 
@@ -831,7 +1471,7 @@ updateEQSwitch()
 
     function highlightCorrect() {
       document.querySelectorAll(".eq-band").forEach(b => {
-        if (parseInt(b.dataset.freq) === currentFrequency) {
+        if (parseFloat(b.dataset.freq) === currentFrequency) {
           b.classList.add("correct")
         }
       })
@@ -839,7 +1479,7 @@ updateEQSwitch()
 
     function updateBandDisplay() {
       document.querySelectorAll(".eq-band").forEach(b => {
-        const f = parseInt(b.dataset.freq)
+        const f = parseFloat(b.dataset.freq)
 
         if (activeFreqs.includes(f)) {
           b.classList.remove("disabled")
@@ -858,6 +1498,17 @@ updateEQSwitch()
         }
       })
     }
+
+    function updateLevelButtons() {
+  document.querySelectorAll(".octave-btn").forEach(btn => {
+    if (parseInt(btn.dataset.level) === level) {
+      btn.classList.remove("inactive")
+    } else {
+      btn.classList.add("inactive")
+    }
+  })
+}
+    
 function updateTransportButtons() {
   const playBtn = document.getElementById("playBtn")
   const stopBtn = document.getElementById("stopBtn")
@@ -890,8 +1541,13 @@ function toggleEQ() {
   eqState = !eqState
   updateEQSwitch()
 
-  if (!filterNode) return
-  filterNode.gain.value = eqState ? boostAmount : 0
+  if (filterNode) {
+    filterNode.gain.value = eqState ? boostAmount : 0
+  }
+
+  if (musicFilterNode) {
+    musicFilterNode.gain.value = eqState ? boostAmount : 0
+  }
 }
 
     function updateScore() {
@@ -915,34 +1571,7 @@ function toggleEQ() {
       return 0
     }
 
-    async function handleAudioStart(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
-
-      audioStartButton.disabled = true
-      audioStartButton.textContent = "Starting..."
-
-      let webAudioOk = false
-
-      try {
-        webAudioOk = await initAudio()
-      } catch (err) {
-        console.error("initAudio failed:", err)
-      }
-
-      if (webAudioOk) {
-        audioReady = true
-        audioStartOverlay.style.display = "none"
-        return
-      }
-
-      audioStartButton.disabled = false
-      audioStartButton.textContent = "Tap to Start Audio"
-      alert("오디오를 시작하지 못했습니다.")
-    }
-
+    
     document.addEventListener("visibilitychange", async () => {
       if (!document.hidden && audioContext) {
         try {
@@ -957,22 +1586,39 @@ function toggleEQ() {
       }
     })
 
+    function formatFreqLabel(freq) {
+  if (freq >= 1000) {
+    const value = freq / 1000
+    return Number.isInteger(value) ? value + "k" : value + "k"
+  }
+  return String(freq)
+}
+console.log(freq13)
+
     freq13.forEach(freq => {
       const band = document.createElement("div")
       band.classList.add("eq-band")
       band.dataset.freq = freq
-      band.innerText = freq >= 1000 ? (freq / 1000) + "k" : freq
+      band.innerText = formatFreqLabel(freq)
       band.onclick = () => checkAnswer(freq, band)
       eqContainer.appendChild(band)
     })
 
-    audioStartButton.addEventListener("click", handleAudioStart)
+    renderCharacterCards()
+updateBandDisplay()
+updateModeButtons()
+updateLevelButtons()
+updateGainButtons()
+updateScore()
+resultText.innerText = "Choose a mode, then press Start."
+loadPlayerProfile()
+renderCharacterCards()
+    
+    musicFileInput.addEventListener("change", async (e) => {
+  const file = e.target.files[0]
+  await handleMusicFileUpload(file)
+})
 
-    updateBandDisplay()
-    updateModeButtons()
-    updateLevelButtons()
-    updateScore()
-    resultText.innerText = "Choose a mode, then press Start."
   </script>
 </body>
 </html>
