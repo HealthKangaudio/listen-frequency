@@ -137,12 +137,12 @@
 }
 #characterGrid{
   display:grid;
-  grid-template-columns:repeat(4, minmax(120px, 1fr));
+  grid-template-columns:repeat(4, 120px);
   gap:14px;
+  width:fit-content;
+  margin:0 auto;
   justify-content:center;
   align-items:stretch;
-  margin:0 auto;
-  max-width:760px;
 }
 
 .character-card{
@@ -185,16 +185,17 @@
 
 @media (max-width: 768px){
   #characterGrid{
-    grid-template-columns:repeat(2, minmax(120px, 1fr));
+    grid-template-columns:repeat(2, 120px);
     gap:12px;
-    max-width:360px;
+    width:fit-content;
+    margin:0 auto;
+    max-width:none;
   }
 
   .character-card img{
     max-width:84px;
     height:84px;
   }
-
 }
 
     .category-btn.inactive{
