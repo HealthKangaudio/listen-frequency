@@ -1,10 +1,121 @@
 <!DOCTYPE html>
 <head>
+  <meta charset="UTF-8">
   <title>Listen Frequency</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
+
+
+.mute-emoji-btn:hover{
+  background:transparent;
+  box-shadow:none;
+  transform:scale(1.06);
+}
+
+.speaker-icon{
+  line-height:1;
+  display:inline-block;
+}
+
+.mute-slash{
+  position:absolute;
+  width:30px;
+  height:3px;
+  background:#d62828;
+  border-radius:999px;
+  transform:rotate(-45deg) scaleX(0);
+  transform-origin:center;
+  opacity:0;
+  transition:transform 0.16s ease, opacity 0.16s ease;
+  pointer-events:none;
+}
+
+.mute-emoji-btn.muted .mute-slash{
+  opacity:1;
+  transform:rotate(-45deg) scaleX(1);
+}
+
+.dim-circle-btn:hover{
+  background:#bfd8cc;
+}
+
+.dim-circle-btn.active{
+  background:#2d6a4f;
+  color:white;
+}
+
+.dim-circle-btn.inactive{
+  opacity:1;
+}
+
+    #analysisCloseBtn{
+  width:36px;
+  height:36px;
+  min-width:36px;
+  min-height:36px;
+  padding:0;
+  margin:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  border-radius:10px;
+  background:#d62828;
+  color:white;
+  font-size:20px;
+  font-weight:800;
+  line-height:1;
+  box-shadow:0 4px 12px rgba(214,40,40,0.28);
+}
+
+#analysisCloseBtn:hover{
+  background:#b71c1c;
+}
+#analysisIconBtn{
+  position:absolute;
+  left:-48px;
+  top:50%;
+  transform:translateY(-50%);
+  width:44px;
+  height:44px;
+  min-width:44px;
+  min-height:44px;
+  padding:0;
+  margin:0;
+  border:none;
+  border-radius:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  box-shadow:none;
+  color:#1b4332;
+  overflow:visible;
+  appearance:none;
+  -webkit-appearance:none;
+  cursor:pointer;
+  transition:transform 0.08s ease;
+}
+
+#analysisIconBtn:hover{
+  transform:translateY(-50%) scale(1.08);
+  background:transparent;
+  box-shadow:none;
+}
+
+#analysisIconBtn{
+  font-size:34px;
+  line-height:1;
+}
+
+    .preview-selected{
+  background:linear-gradient(to top,#3f7f68,#8fd3b4) !important;
+  opacity:0.72;
+  transform:scale(0.985);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18);
+}
     #characterSection{
   display:flex;
   flex-direction:column;
@@ -54,6 +165,9 @@
   width:100%;
   margin-bottom:2px;
   min-height:0;
+}
+#score{
+  white-space:pre-line;
 }
 
 #modeTitle{
@@ -159,18 +273,62 @@
   display:block;
 }
 
+#playerBadgeNameBar{
+  min-width:168px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  padding:0 12px;
+  box-sizing:border-box;
+  position:relative;
+  overflow:visible;
+
+  background:#f4f1de;
+  border:3px solid #1b4332;
+  border-radius:0;
+  box-shadow:4px 4px 0 #95b8a6;
+}
+
+#playerBadgeNameBar::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:16px;
+  background:linear-gradient(
+    135deg,
+    #ff0000,
+    #ff7a00,
+    #ffd500,
+    #33cc33,
+    #00cfff,
+    #4b5cff,
+    #9b4dff,
+    #ff4db8
+  );
+  z-index:-1;
+  filter:blur(4px);
+  opacity:0.9;
+}
+
 #playerBadgeName{
-  min-width:108px;
-  padding:7px 11px;
-  border-radius:12px;
-  background:rgba(27,67,50,0.92);
-  color:white;
+  flex:1;
+  min-width:0;
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+  color:#1b4332;
   font-size:14px;
-  font-weight:700;
+  font-weight:800;
   letter-spacing:0.5px;
   text-align:center;
-  box-shadow:0 4px 12px rgba(0,0,0,0.12);
-  word-break:break-word;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:flex;
+align-items:center;
+justify-content:center;
 }
 
 .character-card{
@@ -212,6 +370,46 @@
 
 
 @media (max-width: 768px){
+#lowestFreqWrap{
+  width:min(442px, calc(100% - 16px));
+  margin:12px auto 8px;
+  left:0;
+}
+
+#lowestFreqSlider{
+  width:100%;
+}
+  #volumeControlWrap .mute-emoji-btn{
+  width:34px;
+  max-width:34px;
+}
+
+#volumeControlWrap .dim-circle-btn{
+  width:38px;
+  max-width:38px;
+}
+#playerBadgeNameBar{
+  min-width:118px;
+  height:38px;
+  padding:0 8px 0 6px;
+  border-radius:12px;
+}
+
+#playerBadgeName{
+  font-size:12px;
+}
+
+#analysisIconBtn{
+  font-size:26px;
+  line-height:1;
+}
+
+#analysisBtn{
+  margin-top:5px;
+  padding:6px 10px;
+  font-size:11px;
+}
+
   #characterGrid{
     grid-template-columns:repeat(2, 120px);
     gap:12px;
@@ -237,29 +435,7 @@
 .category-btn:hover{
   background:#1b4332;
 }
-    #volumeSlider{
-  width:220px;
-  height:18px;
-  accent-color:#2d6a4f;
-  cursor:pointer;
-  vertical-align:middle;
-}
 
-#volumeValue{
-  display:inline-block;
-  min-width:24px;
-  font-weight:700;
-  font-size:18px;
-}
-
-#volumeSlider::-webkit-slider-thumb{
-  width:24px;
-  height:24px;
-}
-
-#volumeSlider::-webkit-slider-runnable-track{
-  height:18px;
-}
     .eq-toggle-wrap{
   display:inline-flex;
   align-items:center;
@@ -268,6 +444,40 @@
   margin:8px;
   vertical-align:middle;
   user-select:none;
+}
+#volumeValue{
+  display:inline-block;
+  min-width:24px;
+  font-weight:700;
+  font-size:18px;
+}
+
+#lowestFreqWrap{
+  width:442px;
+  max-width:442px;
+  margin:12px auto 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  text-align:left;
+  box-sizing:border-box;
+  position:relative;
+  left:-550px;
+}
+
+#lowestFreqSlider{
+  width:442px;
+  max-width:100%;
+  accent-color:#2d6a4f;
+  cursor:pointer;
+  vertical-align:middle;
+}
+
+#lowestFreqLabel{
+  font-size:13px;
+  color:#444;
+  margin-bottom:8px;
+  text-align:left;
 }
 
 .eq-label{
@@ -317,6 +527,14 @@
 .gain-btn.inactive,
 button.inactive{
   opacity:0.35;
+}
+
+.disabled-lowcut{
+  opacity:0.25;
+  filter:grayscale(70%);
+  pointer-events:none;
+  transform:none !important;
+  box-shadow:none !important;
 }
 .gain-btn{
   background:#577590;
@@ -372,6 +590,125 @@ button.inactive{
     button:hover{
       background:#1b4332;
     }
+
+    #volumeControlWrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:10px 0 6px;
+}
+
+#volumeControlWrap .mute-emoji-btn{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  min-width:34px;
+  min-height:34px;
+  padding:0;
+  margin:0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+  border-radius:0;
+  cursor:pointer;
+  color:inherit;
+  font-size:24px;
+}
+
+#volumeControlWrap .mute-emoji-btn:hover{
+  background:transparent;
+  box-shadow:none;
+  transform:scale(1.06);
+}
+
+.speaker-icon{
+  line-height:1;
+  display:inline-block;
+}
+
+.mute-slash{
+  position:absolute;
+  width:30px;
+  height:3px;
+  background:#d62828;
+  border-radius:999px;
+  transform:rotate(-45deg) scaleX(0);
+  transform-origin:center;
+  opacity:0;
+  transition:transform 0.16s ease, opacity 0.16s ease;
+  pointer-events:none;
+}
+
+#volumeControlWrap .mute-emoji-btn.muted .mute-slash{
+  opacity:1;
+  transform:rotate(-45deg) scaleX(1);
+}
+
+#volumeControlWrap .dim-circle-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:38px;
+  height:38px;
+  min-width:38px;
+  min-height:38px;
+  padding:0;
+  margin:0;
+  border:none;
+  border-radius:50%;
+  background:#d7e7de;
+  color:#1b4332;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.2px;
+  cursor:pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+#volumeControlWrap .dim-circle-btn:hover{
+  background:#bfd8cc;
+}
+
+#volumeControlWrap .dim-circle-btn.active{
+  background:#d7e7de;
+  color:#1b4332;
+  transform:translateY(3px);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.18),
+    inset 0 -1px 2px rgba(255,255,255,0.35);
+}
+
+/* active 상태에서는 hover 때도 거의 유지 */
+#volumeControlWrap .dim-circle-btn.active:hover{
+  transform:translateY(4px);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.18),
+    inset 0 -1px 2px rgba(255,255,255,0.35);
+}
+
+#volumeControlWrap .dim-circle-btn.inactive{
+  background:#d7e7de;
+  color:#1b4332;
+  box-shadow:
+    0 3px 0 #9fb7ab,
+    0 5px 10px rgba(0,0,0,0.10);
+  transform:translateY(0);
+}
+#volumeControlWrap .dim-circle-btn.inactive:hover{
+  transform:translateY(1px);
+  box-shadow:
+    0 2px 0 #9fb7ab,
+    0 4px 8px rgba(0,0,0,0.10);
+}
 
     .mode-btn{
       background:#40916c;
@@ -466,6 +803,11 @@ button.inactive{
       box-sizing:border-box;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
+      transition:
+  background 0.16s ease,
+  opacity 0.16s ease,
+  transform 0.16s ease,
+  box-shadow 0.16s ease;
     }
 
     .eq-band.disabled{
@@ -601,6 +943,62 @@ button.inactive{
         max-height:220px;
       }
     }
+
+    .analysis-modal{
+  position:fixed;
+  inset:0;
+  z-index:3000;
+}
+
+.analysis-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.42);
+}
+
+.analysis-panel{
+  position:relative;
+  z-index:1;
+  width:min(920px, calc(100vw - 32px));
+  max-height:calc(100vh - 40px);
+  overflow:auto;
+  margin:20px auto;
+  background:white;
+  border-radius:20px;
+  box-shadow:0 18px 45px rgba(0,0,0,0.22);
+  padding:22px 22px 26px;
+  box-sizing:border-box;
+}
+
+.analysis-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+  position:sticky;
+  top:0;
+  background:white;
+  padding-bottom:8px;
+}
+
+.analysis-panel canvas{
+  max-width:100%;
+}
+
+@media (max-width: 768px){
+  .analysis-panel{
+    width:min(96vw, 96vw);
+    max-height:calc(100vh - 20px);
+    margin:10px auto;
+    padding:16px 14px 20px;
+    border-radius:16px;
+  }
+
+  .analysis-header{
+    align-items:flex-start;
+  }
+}
   </style>
 </head>
 
@@ -649,14 +1047,18 @@ button.inactive{
 
   <div id="modeSection">
   <div id="modeHeader">
-    <h3 id="modeTitle">🎵 Mode</h3>
+  <h3 id="modeTitle">🔀 Mode</h3>
 
-    <div id="playerBadge" style="display:none;">
-      <div id="playerBadgeFrame">
-        <img id="playerBadgeImg" src="" alt="character">
-      </div>
-      <div id="playerBadgeName">PLAYER</div>
-    </div>
+   <div id="playerBadge" style="display:none;">
+  <div id="playerBadgeFrame">
+    <img id="playerBadgeImg" src="" alt="character">
+  </div>
+
+  <div id="playerBadgeNameBar">
+ <button id="analysisIconBtn" type="button" onclick="openAnalysisModal()" aria-label="Open My Data">📋</button>
+    <div id="playerBadgeName">PLAYER</div>
+  </div>
+</div>
   </div>
 
   <div class="mode-button-group">
@@ -673,20 +1075,19 @@ button.inactive{
     </div>
     </div>
 
-    <h3>📶 Octave</h3>
+ <h3>🎹 Octave</h3>
 
     <button class="octave-btn" data-level="1" onclick="setLevel(1)">1 Octave</button>
 <button class="octave-btn" data-level="2" onclick="setLevel(2)">2/3 Octave</button>
 <button class="octave-btn" data-level="3" onclick="setLevel(3)">1/3 Octave</button>
 
 <div id="gainArea" style="display:none;">
-  <h3>⚡ Gain</h3>
+<h3>↕️ Gain</h3>
   <button class="gain-btn" data-gain="9" onclick="setGainMode(9)">Easy ( ± 9 dB )</button>
   <button class="gain-btn" data-gain="6" onclick="setGainMode(6)">Hard ( ± 6 dB )</button>
 </div>
 
     <hr style="margin:30px 0">
-
     <div id="controlArea"></div>
     <div id="musicUploadArea" style="display:none; margin:20px 0;">
   <p id="musicUploadGuide" style="margin-bottom:6px; font-weight:600; font-size:13px;">
@@ -708,22 +1109,834 @@ button.inactive{
 
     <br>
 
-    🔊 Volume
-    <input type="range" id="volumeSlider" min="0" max="10" step="1" value="5">
-    <span id="volumeValue">5</span>
+    <div id="volumeControlWrap">
+  <button id="dimBtn" type="button" class="dim-circle-btn inactive" onclick="toggleDim()" aria-label="Dim" aria-pressed="false">
+    DIM
+  </button>
 
-    <div class="eq-container" id="eqContainer"></div>
+  <button id="muteBtn" type="button" class="mute-emoji-btn" onclick="toggleMute()" aria-label="Mute" aria-pressed="false">
+    <span class="speaker-icon">🔊</span>
+    <span class="mute-slash" aria-hidden="true"></span>
+  </button>
+
+  <input type="range" id="volumeSlider" min="0" max="10" step="1" value="5">
+  <span id="volumeValue">5</span>
+</div>
+<div id="lowestFreqWrap">
+  <div id="lowestFreqLabel">Lowest Frequency: 20 Hz</div>
+  <input type="range" id="lowestFreqSlider" min="0" max="8" step="1" value="0">
+</div>
+
+<div class="eq-container" id="eqContainer"></div>
     <div id="result"></div>
     <div id="score"></div>
 
     <div id="resultImage">
       <img id="feedbackImg" src="">
     </div>
+
+    <hr style="margin:30px 0">
+
   </div>
 
-  <script> 
+<div id="analysisModal" class="analysis-modal" style="display:none;">
+  <div class="analysis-backdrop" onclick="closeAnalysisModal()"></div>
 
+  <div class="analysis-panel">
+    <div class="analysis-header">
+  <h3 style="margin:0;">📊 My Data</h3>
+  <button id="analysisCloseBtn" type="button" onclick="closeAnalysisModal()" aria-label="Close">✕</button>
+</div>
+
+    <div id="statsSection" style="margin-top:18px;">
+      <div style="margin-bottom:14px;">
+        <label for="statsFilter" style="font-weight:700;">View:</label>
+<select id="statsFilter" style="padding:8px 10px; border-radius:8px; font-size:14px;">
+  <option value="allModes">All Modes</option>
+  <option value="mode_1">Sine Wave</option>
+  <option value="mode_2">Pink Boost</option>
+  <option value="mode_3">Pink Cut</option>
+  <option value="mode_4">Pink Random</option>
+  <option value="mode_5">Music Boost</option>
+  <option value="mode_6">Music Cut</option>
+  <option value="mode_7">Music Random</option>
+</select>
+      </div>
+
+      <canvas id="growthChart" height="110"></canvas>
+
+      <div id="statsSummary" style="margin-top:16px; line-height:1.8;"></div>
+
+      <div id="wrongFreqStats" style="margin-top:18px; text-align:left; max-width:680px; margin-left:auto; margin-right:auto;">
+        <h4 style="margin-bottom:10px;">Most Missed Frequencies</h4>
+        <div id="wrongFreqList" style="font-size:14px; line-height:1.7;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js"; 
+ 
+ const firebaseConfig = {
+  apiKey: "AIzaSyAWQKfWrsyF3PKn8ApZ9ooL5JVI-kHDdus",
+  authDomain: "listen-frequency-training.firebaseapp.com",
+  projectId: "listen-frequency-training",
+  storageBucket: "listen-frequency-training.firebasestorage.app",
+  messagingSenderId: "112161161530",
+  appId: "1:112161161530:web:d07774175b69729f96d003"
+};
+
+  function renderWrongFrequencyStats(records) {
+  const wrongFreqList = document.getElementById("wrongFreqList")
+  if (!wrongFreqList) return
+
+  const wrongCounts = {}
+
+  records.forEach(record => {
+    if (!record.questions || !Array.isArray(record.questions)) return
+
+    record.questions.forEach(question => {
+      if (!question.isCorrect) {
+        const freq = question.targetFrequency
+        if (freq != null) {
+          wrongCounts[freq] = (wrongCounts[freq] || 0) + 1
+        }
+      }
+    })
+  })
+
+  const sorted = Object.entries(wrongCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+
+  if (sorted.length === 0) {
+    wrongFreqList.innerText = "No missed frequency data yet."
+    return
+  }
+
+  wrongFreqList.innerHTML = sorted
+    .map(([freq, count], index) => {
+      return `<div>${index + 1}. ${formatFreqLabel(Number(freq))}Hz — missed ${count} time${count > 1 ? "s" : ""}</div>`
+    })
+    .join("")
+}
+
+function openAnalysisModal() {
+  const modal = document.getElementById("analysisModal")
+  if (!modal) return
+
+  modal.style.display = "block"
+  refreshStats()
+}
+
+function closeAnalysisModal() {
+  const modal = document.getElementById("analysisModal")
+  if (!modal) return
+
+  modal.style.display = "none"
+}
+
+  async function refreshStats() {
+  const records = await loadTrainingRecordsFromFirestore()
+  renderGrowthChart(records)
+  renderWrongFrequencyStats(records)
+}
+function getModeLabel(modeValue) {
+  const modeMap = {
+    1: "Sine Wave",
+    2: "Pink Boost",
+    3: "Pink Cut",
+    4: "Pink Random",
+    5: "Music Boost",
+    6: "Music Cut",
+    7: "Music Random"
+  }
+  return modeMap[modeValue] || `Mode ${modeValue}`
+}
+
+function getModeColor(modeValue) {
+  const colorMap = {
+    1: "#000000", // Sine Wave
+    2: "#ff69b4", // Pink Boost base
+    3: "#f59e0b", // Pink Cut base
+    4: "#a855f7", // Pink Random base
+    5: "#22c55e", // Music Boost base
+    6: "#3b82f6", // Music Cut base
+    7: "#8b4513"  // Music Random base
+  }
+  return colorMap[modeValue] || "#444"
+}
+
+function getDifficultyLabel(record) {
+  if (record.mode === 1) return "Sine"
+
+  if (record.gainMode === 9) return "Easy"
+  if (record.gainMode === 6) return "Hard"
+
+  return "Unknown"
+}
+
+function getDifficultyColor(modeValue, difficulty) {
+  const colorMap = {
+    1: {
+      Sine: "#000000"
+    },
+    2: {
+      Easy: "#ffb6d9", // Pink Boost Easy - 연한 분홍
+      Hard: "#ff1493"  // Pink Boost Hard - 진한 분홍
+    },
+    3: {
+      Easy: "#ffd84d", // Pink Cut Easy - 노랑
+      Hard: "#ff8c00"  // Pink Cut Hard - 주황
+    },
+    4: {
+      Easy: "#d8b4fe", // Pink Random Easy - 연한 보라
+      Hard: "#7e22ce"  // Pink Random Hard - 진한 보라
+    },
+    5: {
+      Easy: "#86efac", // Music Boost Easy - 연한 녹색
+      Hard: "#15803d"  // Music Boost Hard - 진한 녹색
+    },
+    6: {
+      Easy: "#93c5fd", // Music Cut Easy - 연한 파랑
+      Hard: "#1d4ed8"  // Music Cut Hard - 진한 파랑
+    },
+    7: {
+      Easy: "#8b4513", // Music Random Easy - 갈색
+      Hard: "#8b0000"  // Music Random Hard - 진한 빨강
+    }
+  }
+
+  return colorMap[modeValue]?.[difficulty] || getModeColor(modeValue)
+}
+
+function getRecordDateString(record) {
+  const source =
+    (record.finishedAt ? new Date(record.finishedAt) : null) ||
+    (record.startedAt ? new Date(record.startedAt) : null) ||
+    record.createdAt?.toDate?.() ||
+    (record.createdAt?.seconds ? new Date(record.createdAt.seconds * 1000) : null)
+
+  if (!source || Number.isNaN(source.getTime())) return "Unknown Date"
+
+  const year = source.getFullYear()
+  const month = String(source.getMonth() + 1).padStart(2, "0")
+  const day = String(source.getDate()).padStart(2, "0")
+
+  return `${year}-${month}-${day}`
+}
+
+function sortDateLabels(labels) {
+  return [...labels].sort((a, b) => {
+    if (a === "Unknown Date") return 1
+    if (b === "Unknown Date") return -1
+    return new Date(a) - new Date(b)
+  })
+}
+
+function formatDateLabel(dateKey, useYear = false) {
+  if (!dateKey || dateKey === "Unknown Date") return "Unknown Date"
+
+  const [year, month, day] = dateKey.split("-").map(Number)
+  if (!year || !month || !day) return dateKey
+
+  return useYear ? `${year}/${month}/${day}` : `${month}/${day}`
+}
+
+function round1(value) {
+  return Math.round(value * 10) / 10
+}
+
+function getQuestionDifficulty(question, record) {
+  const resolvedGainMode = question?.gainMode ?? record?.gainMode
+
+  if (record?.mode === 1) return "Sine"
+  if (resolvedGainMode === 9) return "Easy"
+  if (resolvedGainMode === 6) return "Hard"
+
+  return null
+}
+
+function average(values) {
+  if (!values.length) return 0
+  return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10
+}
+
+function getSeriesStyle(modeValue, difficulty) {
+  return {
+    borderColor: getDifficultyColor(modeValue, difficulty),
+    backgroundColor: getDifficultyColor(modeValue, difficulty),
+    borderDash: difficulty === "Easy" ? [6, 4] : [],
+    tension: 0.25,
+    spanGaps: true,
+    pointRadius: 3,
+    pointHoverRadius: 5
+  }
+}
+  function renderGrowthChart(records) {
+  const canvas = document.getElementById("growthChart")
+  const summary = document.getElementById("statsSummary")
+  const statsFilter = document.getElementById("statsFilter")
   
+
+  if (!canvas || !summary || !statsFilter) return
+
+  const filterValue = statsFilter.value || "allModes"
+
+  if (growthChart) {
+    growthChart.destroy()
+  }
+
+  if (!records || records.length === 0) {
+    growthChart = new Chart(canvas, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: []
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    })
+
+    summary.innerHTML = "No saved training data yet."
+    return
+  }
+
+  const seriesByDate = {}
+  const seriesTotals = {}
+  const overallByDate = {}
+  const allDateKeys = new Set()
+
+  function ensureSeries(seriesKey, dateKey) {
+    if (!seriesByDate[seriesKey]) seriesByDate[seriesKey] = {}
+    if (!seriesByDate[seriesKey][dateKey]) {
+      seriesByDate[seriesKey][dateKey] = { total: 0, correct: 0 }
+    }
+    if (!seriesTotals[seriesKey]) {
+      seriesTotals[seriesKey] = { total: 0, correct: 0 }
+    }
+  }
+
+  function ensureOverall(dateKey) {
+    if (!overallByDate[dateKey]) {
+      overallByDate[dateKey] = { total: 0, correct: 0 }
+    }
+  }
+
+  function addStat(seriesKey, dateKey, total, correct) {
+    if (!total) return
+
+    allDateKeys.add(dateKey)
+    ensureSeries(seriesKey, dateKey)
+    ensureOverall(dateKey)
+
+    seriesByDate[seriesKey][dateKey].total += total
+    seriesByDate[seriesKey][dateKey].correct += correct
+
+    seriesTotals[seriesKey].total += total
+    seriesTotals[seriesKey].correct += correct
+
+    overallByDate[dateKey].total += total
+    overallByDate[dateKey].correct += correct
+  }
+
+  records.forEach(record => {
+    const dateKey = getRecordDateString(record)
+    const questions = Array.isArray(record.questions) ? record.questions : []
+
+    // 특정 모드: Sine Wave
+    if (filterValue === "mode_1") {
+      if (record.mode !== 1) return
+
+      if (questions.length > 0) {
+        let total = 0
+        let correct = 0
+
+        questions.forEach(question => {
+          total += 1
+          if (question.isCorrect) correct += 1
+        })
+
+        addStat("Sine Wave", dateKey, total, correct)
+      } else {
+        const total = Number(record.totalQuestions) || 0
+        const correct = Number(record.correctAnswers) || 0
+        addStat("Sine Wave", dateKey, total, correct)
+      }
+
+      return
+    }
+
+    // All modes: Sine 포함 + 나머지 모드 Easy/Hard 분리
+    if (filterValue === "allModes") {
+      if (record.mode === 1) {
+        if (questions.length > 0) {
+          let total = 0
+          let correct = 0
+
+          questions.forEach(question => {
+            total += 1
+            if (question.isCorrect) correct += 1
+          })
+
+          addStat("Sine Wave", dateKey, total, correct)
+        } else {
+          const total = Number(record.totalQuestions) || 0
+          const correct = Number(record.correctAnswers) || 0
+          addStat("Sine Wave", dateKey, total, correct)
+        }
+
+        return
+      }
+
+      if (questions.length > 0) {
+        questions.forEach(question => {
+          const difficulty = getQuestionDifficulty(question, record)
+          if (!difficulty || difficulty === "Sine") return
+
+          const seriesKey = `${getModeLabel(record.mode)} · ${difficulty}`
+          addStat(seriesKey, dateKey, 1, question.isCorrect ? 1 : 0)
+        })
+      } else {
+        const difficulty = getQuestionDifficulty(null, record)
+        if (!difficulty || difficulty === "Sine") return
+
+        const total = Number(record.totalQuestions) || 0
+        const correct = Number(record.correctAnswers) || 0
+        const seriesKey = `${getModeLabel(record.mode)} · ${difficulty}`
+
+        addStat(seriesKey, dateKey, total, correct)
+      }
+
+      return
+    }
+
+    // 특정 모드(2~7): Easy / Hard 분리
+    const selectedMode = Number(filterValue.replace("mode_", ""))
+    if (record.mode !== selectedMode) return
+
+    if (questions.length > 0) {
+      questions.forEach(question => {
+        const difficulty = getQuestionDifficulty(question, record)
+        if (!difficulty || difficulty === "Sine") return
+
+        addStat(difficulty, dateKey, 1, question.isCorrect ? 1 : 0)
+      })
+    } else {
+      const difficulty = getQuestionDifficulty(null, record)
+      if (!difficulty || difficulty === "Sine") return
+
+      const total = Number(record.totalQuestions) || 0
+      const correct = Number(record.correctAnswers) || 0
+
+      addStat(difficulty, dateKey, total, correct)
+    }
+  })
+
+  const labels = sortDateLabels([...allDateKeys])
+
+  const containsMultipleYears = (() => {
+    const years = new Set(
+      labels
+        .filter(dateKey => dateKey !== "Unknown Date")
+        .map(dateKey => String(dateKey).slice(0, 4))
+    )
+    return years.size > 1
+  })()
+
+  let datasets = []
+
+  if (filterValue === "mode_1") {
+    datasets = [
+  {
+    label: "Sine Wave",
+    data: labels.map(dateKey => {
+      const stat = seriesByDate["Sine Wave"]?.[dateKey]
+      if (!stat || !stat.total) return null
+      return round1((stat.correct / stat.total) * 100)
+    }),
+    borderColor: getDifficultyColor(1, "Sine"),
+    backgroundColor: getDifficultyColor(1, "Sine"),
+    borderDash: [],
+    tension: 0.25,
+    spanGaps: true,
+    pointRadius: 3,
+    pointHoverRadius: 5
+  }
+]
+  } else if (filterValue === "allModes") {
+    const orderedSeries = [
+      { label: "Sine Wave", mode: 1, difficulty: "Sine" },
+
+      { label: "Pink Boost · Easy", mode: 2, difficulty: "Easy" },
+      { label: "Pink Boost · Hard", mode: 2, difficulty: "Hard" },
+
+      { label: "Pink Cut · Easy", mode: 3, difficulty: "Easy" },
+      { label: "Pink Cut · Hard", mode: 3, difficulty: "Hard" },
+
+      { label: "Pink Random · Easy", mode: 4, difficulty: "Easy" },
+      { label: "Pink Random · Hard", mode: 4, difficulty: "Hard" },
+
+      { label: "Music Boost · Easy", mode: 5, difficulty: "Easy" },
+      { label: "Music Boost · Hard", mode: 5, difficulty: "Hard" },
+
+      { label: "Music Cut · Easy", mode: 6, difficulty: "Easy" },
+      { label: "Music Cut · Hard", mode: 6, difficulty: "Hard" },
+
+      { label: "Music Random · Easy", mode: 7, difficulty: "Easy" },
+      { label: "Music Random · Hard", mode: 7, difficulty: "Hard" }
+    ]
+
+    datasets = orderedSeries
+  .map(item => {
+    return {
+      label: item.label,
+      data: labels.map(dateKey => {
+        const stat = seriesByDate[item.label]?.[dateKey]
+        if (!stat || !stat.total) return null
+        return round1((stat.correct / stat.total) * 100)
+      }),
+      borderColor: getDifficultyColor(item.mode, item.difficulty),
+      backgroundColor: getDifficultyColor(item.mode, item.difficulty),
+      borderDash: item.difficulty === "Easy" ? [6, 4] : [],
+      tension: 0.25,
+      spanGaps: true,
+      pointRadius: 3,
+      pointHoverRadius: 5
+    }
+  })
+  .filter(dataset => dataset.data.some(value => value !== null))
+  } else {
+    const selectedMode = Number(filterValue.replace("mode_", ""))
+
+    datasets = ["Easy", "Hard"]
+  .map(difficulty => {
+    return {
+      label: difficulty,
+      data: labels.map(dateKey => {
+        const stat = seriesByDate[difficulty]?.[dateKey]
+        if (!stat || !stat.total) return null
+        return round1((stat.correct / stat.total) * 100)
+      }),
+      borderColor: getDifficultyColor(selectedMode, difficulty),
+      backgroundColor: getDifficultyColor(selectedMode, difficulty),
+      borderDash: difficulty === "Easy" ? [6, 4] : [],
+      tension: 0.25,
+      spanGaps: true,
+      pointRadius: 3,
+      pointHoverRadius: 5
+    }
+  })
+  .filter(dataset => dataset.data.some(value => value !== null))
+  }
+
+growthChart = new Chart(canvas, {
+  type: "line",
+  data: {
+    labels,
+    datasets
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: {
+      mode: "nearest",
+      intersect: false
+    },
+    plugins: {
+      legend: {
+  display: true,
+  labels: {
+    boxWidth: 22,
+    boxHeight: 10,
+    padding: 14,
+    font: {
+      size: 12,
+      weight: "600"
+    }
+  }
+},
+      tooltip: {
+        callbacks: {
+          title(items) {
+            if (!items || !items.length) return ""
+            return formatDateLabel(items[0].label, containsMultipleYears)
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 0,
+          callback: function(value) {
+            const raw = this.getLabelForValue(value)
+            return formatDateLabel(raw, containsMultipleYears)
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        max: 100,
+        title: {
+          display: true,
+          text: "Accuracy (%)"
+        }
+      }
+    }
+  }
+})
+
+  const latestDateKey = labels.length ? labels[labels.length - 1] : null
+  const latestDayStat = latestDateKey ? overallByDate[latestDateKey] : null
+
+  const totalQuestionsAll = Object.values(overallByDate).reduce((sum, stat) => sum + stat.total, 0)
+  const totalCorrectAll = Object.values(overallByDate).reduce((sum, stat) => sum + stat.correct, 0)
+
+  // Best = 현재 보이는 시리즈들 중 최고 overall accuracy
+  const visibleSeriesBestValues = Object.values(seriesTotals)
+    .filter(stat => stat.total > 0)
+    .map(stat => (stat.correct / stat.total) * 100)
+
+  const best = visibleSeriesBestValues.length
+    ? round1(Math.max(...visibleSeriesBestValues))
+    : 0
+
+  // Average = correct / total 백분율
+  const avg = totalQuestionsAll
+    ? round1((totalCorrectAll / totalQuestionsAll) * 100)
+    : 0
+
+  const showBestStat = filterValue === "allModes"
+
+if (latestDayStat && latestDateKey) {
+  const styledDate = `
+    <span style="
+      display:inline-block;
+      margin-right:14px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#f3f4f6;
+      color:#374151;
+      font-size:13px;
+      font-weight:700;
+      vertical-align:middle;
+    ">
+      ${formatDateLabel(latestDateKey, containsMultipleYears)}
+    </span>
+  `
+
+  const statsParts = [
+    `Total: ${latestDayStat.total}`,
+    `Correct: ${latestDayStat.correct}`,
+    ...(showBestStat ? [`Best: ${best}%`] : []),
+    `Average: ${avg}%`
+  ]
+
+  const styledStats = `
+    <span style="
+      font-size:15px;
+      font-weight:600;
+      color:#222;
+      vertical-align:middle;
+    ">
+      ${statsParts.join(`<span style="color:#999; padding:0 8px;">|</span>`)}
+    </span>
+  `
+
+  summary.innerHTML = styledDate + styledStats
+} else {
+  const statsParts = [
+    ...(showBestStat ? [`Best: ${best}%`] : []),
+    `Average: ${avg}%`
+  ]
+
+  summary.innerHTML = `
+    <span style="font-size:15px; font-weight:600; color:#222;">
+      ${statsParts.join(`<span style="color:#999; padding:0 8px;">|</span>`)}
+    </span>
+  `
+}
+}
+function getBaseVolumeGain() {
+  return Number(volumeSlider.value) / 10
+}
+
+function getDimMultiplier() {
+  return dimEnabled ? DIM_GAIN : 1
+}
+
+function getMuteMultiplier() {
+  return muteEnabled ? 0 : 1
+}
+
+function applyMasterGain(extraDb = 0, immediate = false) {
+  if (!masterGain || !audioContext) return
+
+  const now = audioContext.currentTime
+  const baseGain = getBaseVolumeGain()
+  const extraGain = Math.pow(10, extraDb / 20)
+  const finalGain = baseGain * getDimMultiplier() * getMuteMultiplier() * extraGain
+
+  masterGain.gain.cancelScheduledValues(now)
+
+  if (immediate) {
+    masterGain.gain.setValueAtTime(finalGain, now)
+  } else {
+    masterGain.gain.setTargetAtTime(finalGain, now, 0.02)
+  }
+}
+
+  async function loadTrainingRecordsFromFirestore() {
+  const nicknameInput = document.getElementById("nicknameInput")
+  const currentNickname =
+    (playerNickname && playerNickname.trim()) ||
+    (nicknameInput && nicknameInput.value ? nicknameInput.value.trim() : "")
+
+  const statsFilter = document.getElementById("statsFilter")
+  const filterValue = statsFilter ? statsFilter.value : "allModes"
+
+  let records = getSavedTrainingHistory(currentNickname)
+
+  if (filterValue !== "allModes") {
+    const selectedMode = Number(filterValue.replace("mode_", ""))
+    records = records.filter(record => record.mode === selectedMode)
+  }
+
+  return records
+}
+async function saveSessionToFirestore(sessionRecord) {
+  if (!sessionRecord) return;
+
+  try {
+    const currentUid = auth.currentUser ? auth.currentUser.uid : null;
+
+    console.log("saving session:", {
+  nickname: sessionRecord.nickname,
+  category: sessionRecord.category,
+  character: sessionRecord.character,
+  uid: currentUid
+})
+
+    await addDoc(collection(db, "trainingRecords"), {
+      ...sessionRecord,
+      uid: currentUid,
+      createdAt: serverTimestamp()
+    });
+
+    console.log("Firestore save success");
+await refreshStats();
+  } catch (error) {
+    console.error("Firestore save failed:", error);
+  }
+}
+
+function getSavedTrainingHistory(nickname = playerNickname) {
+  const key = getHistoryStorageKey(nickname)
+  return JSON.parse(localStorage.getItem(key) || "[]")
+}
+  function hasSavableSession() {
+  return !!(currentSessionRecord && totalQuestions > 0)
+}
+function finalizeCurrentSession() {
+  if (!currentSessionRecord) return null
+
+  currentSessionRecord.finishedAt = new Date().toISOString()
+  currentSessionRecord.totalQuestions = totalQuestions
+  currentSessionRecord.correctAnswers = correctAnswers
+  currentSessionRecord.accuracy =
+    totalQuestions > 0
+      ? Math.round((correctAnswers / totalQuestions) * 100)
+      : 0
+
+  return currentSessionRecord
+}
+
+function saveSessionToLocalHistory(sessionRecord) {
+  if (!sessionRecord) return
+
+  const key = getHistoryStorageKey(sessionRecord.nickname)
+  const existing = JSON.parse(localStorage.getItem(key) || "[]")
+  existing.push(sessionRecord)
+  localStorage.setItem(key, JSON.stringify(existing))
+
+  saveSessionToFirestore(sessionRecord)
+}
+
+function endCurrentSession() {
+  if (!hasSavableSession()) {
+    currentSessionRecord = null
+    currentQuestionStartTime = null
+    return
+  }
+
+  const finalized = finalizeCurrentSession()
+  if (!finalized) return
+
+  saveSessionToLocalHistory(finalized)
+  console.log("auto-saved session:", finalized)
+
+  currentSessionRecord = null
+  currentQuestionStartTime = null
+}
+
+function clearPreviewSelection() {
+  document.querySelectorAll(".eq-band").forEach(b => {
+    b.classList.remove("preview-selected")
+  })
+  previewSelectedFreq = null
+}
+
+function markPreviewSelection(freq) {
+  clearPreviewSelection()
+
+  document.querySelectorAll(".eq-band").forEach(b => {
+    if (parseFloat(b.dataset.freq) === freq) {
+      if (!b.classList.contains("correct") && !b.classList.contains("wrong")) {
+        b.classList.add("preview-selected")
+      }
+    }
+  })
+
+  previewSelectedFreq = freq
+}
+
+  function createNewSessionRecord() {
+  const profile = getPlayerProfile()
+
+  currentSessionRecord = {
+    sessionId: "session_" + Date.now(),
+    nickname: profile.nickname,
+    category: profile.category,
+    character: profile.character,
+    startedAt: new Date().toISOString(),
+    finishedAt: null,
+
+    mode: mode,
+    level: level,
+    gainMode: gainMode,
+
+    totalQuestions: 0,
+    correctAnswers: 0,
+    accuracy: 0,
+
+    questions: []
+  }
+}
     let eqState = true
 let pinkIsPlaying = false
     function updateEQButtonState() {
@@ -740,8 +1953,12 @@ let pinkIsPlaying = false
     eqOffBtn.classList.remove("inactive")
   }
 }
-    const volumeSlider = document.getElementById("volumeSlider")
-    const volumeValue = document.getElementById("volumeValue")
+const volumeSlider = document.getElementById("volumeSlider")
+const volumeValue = document.getElementById("volumeValue")
+const lowestFreqSlider = document.getElementById("lowestFreqSlider")
+const lowestFreqLabel = document.getElementById("lowestFreqLabel")
+const dimBtn = document.getElementById("dimBtn")
+const muteBtn = document.getElementById("muteBtn")
     const eqContainer = document.getElementById("eqContainer")
     const resultText = document.getElementById("result")
     const controlArea = document.getElementById("controlArea")
@@ -767,6 +1984,10 @@ const freq23 = [
 ]
 
 const freqOct = [31.5,63,125,250,500,1000,2000,4000,8000,16000]
+const LOW_FREQS = [20, 31.5, 40, 50, 63, 80, 100, 125, 160]
+
+let lowCutIndex = 0
+let lowCutFreq = LOW_FREQS[0]
 
     let level = 3
     let activeFreqs = freq13
@@ -786,17 +2007,32 @@ let musicGain = null
 let musicFilterNode = null
 
     let questionAnswered = false
+    let answerResultMessage = ""
 let playerNickname = ""
 let playerCategory = ""
 let playerCharacter = ""
+let previewSelectedFreq = null
 let trainingStarted = false
     let totalQuestions = 0
     let correctAnswers = 0
     let hasStarted = false
+    let currentSessionRecord = null
+let currentQuestionStartTime = null
+let growthChart = null
+let dimEnabled = false
+let muteEnabled = false
+const DIM_DB = -26
+const DIM_GAIN = Math.pow(10, DIM_DB / 20)
 
 const STORAGE_CHARACTER_KEY = "listen_frequency_character"
-    const STORAGE_NICKNAME_KEY = "listen_frequency_nickname"
+const STORAGE_NICKNAME_KEY = "listen_frequency_nickname"
 const STORAGE_CATEGORY_KEY = "listen_frequency_category"
+const STORAGE_HISTORY_KEY_PREFIX = "listen_frequency_training_history_"
+
+function getHistoryStorageKey(nickname) {
+  const safeNickname = (nickname || "").trim().toLowerCase()
+  return STORAGE_HISTORY_KEY_PREFIX + safeNickname
+}
 let uploadedAudioBuffer = null
 let uploadedAudioName = ""
 const characters = [
@@ -809,6 +2045,26 @@ const characters = [
   { id: "penguin", name: "Penguin", file: "characters/penguin_headphones.png" },
   { id: "honeybadger", name: "Honey Badger", file: "characters/honeybadger_guitar.png" }
 ]
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+try {
+  await signInAnonymously(auth);
+  console.log("Firebase anonymous auth success");
+  await refreshStats();
+} catch (error) {
+  console.error("Firebase anonymous auth failed:", error);
+}
+
+function getPlayerProfile() {
+  return {
+    nickname: playerNickname || "",
+    category: playerCategory || "",
+    character: playerCharacter || ""
+  }
+}
 
 function savePlayerProfile() {
   localStorage.setItem(STORAGE_NICKNAME_KEY, playerNickname)
@@ -873,9 +2129,17 @@ if (!playerCharacter) {
     return
   }
 
+  endCurrentSession()
+
   playerNickname = nickname
   trainingStarted = true
   audioReady = true
+
+  currentSessionRecord = null
+currentQuestionStartTime = null
+totalQuestions = 0
+correctAnswers = 0
+updateScore()
 
   savePlayerProfile()
 
@@ -897,6 +2161,7 @@ playerBadge.style.display = "flex"
   trainingPanel.style.display = "block"
 
   resultText.innerText = "Choose a mode, then press Start."
+  await refreshStats()
 }
 
 function selectCategory(category) {
@@ -934,15 +2199,15 @@ function selectCharacter(characterId) {
     }
 
     function createContext() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)()
-        masterGain = audioContext.createGain()
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    masterGain = audioContext.createGain()
 
-        const vol = volumeSlider.value / 10
-        masterGain.gain.setValueAtTime(vol, audioContext.currentTime)
-        masterGain.connect(audioContext.destination)
-      }
-    }
+    const initialGain = getBaseVolumeGain() * getDimMultiplier() * getMuteMultiplier()
+    masterGain.gain.setValueAtTime(initialGain, audioContext.currentTime)
+    masterGain.connect(audioContext.destination)
+  }
+}
 
     async function ensureAudioRunning() {
       createContext()
@@ -984,14 +2249,60 @@ function selectCharacter(characterId) {
     }
 
     volumeSlider.oninput = function () {
-      volumeValue.innerText = this.value
+  volumeValue.innerText = this.value
+  applyMasterGain(getCurrentExtraDb())
+}
 
-      if (masterGain && audioContext) {
-        const now = audioContext.currentTime
-        const target = this.value / 10
-        masterGain.gain.setTargetAtTime(target, now, 0.02)
-      }
-    }
+lowestFreqSlider.oninput = function () {
+  lowCutIndex = Number(this.value)
+  lowCutFreq = LOW_FREQS[lowCutIndex]
+  lowestFreqLabel.innerText = `Lowest Frequency: ${lowCutFreq} Hz`
+  updateLowCutButtonState()
+}
+
+function updateDimButton() {
+  if (!dimBtn) return
+
+  if (dimEnabled) {
+    dimBtn.classList.remove("inactive")
+    dimBtn.classList.add("active")
+    dimBtn.setAttribute("aria-pressed", "true")
+  } else {
+    dimBtn.classList.remove("active")
+    dimBtn.classList.add("inactive")
+    dimBtn.setAttribute("aria-pressed", "false")
+  }
+}
+
+function updateMuteButton() {
+  if (!muteBtn) return
+
+  if (muteEnabled) {
+    muteBtn.classList.add("muted")
+    muteBtn.setAttribute("aria-pressed", "true")
+    muteBtn.setAttribute("aria-label", "Unmute")
+  } else {
+    muteBtn.classList.remove("muted")
+    muteBtn.setAttribute("aria-pressed", "false")
+    muteBtn.setAttribute("aria-label", "Mute")
+  }
+}
+
+function getCurrentExtraDb() {
+  return (mode >= 2 && mode <= 4) ? getPinkCompensationDb() : 0
+}
+
+function toggleDim() {
+  dimEnabled = !dimEnabled
+  updateDimButton()
+  applyMasterGain(getCurrentExtraDb())
+}
+
+function toggleMute() {
+  muteEnabled = !muteEnabled
+  updateMuteButton()
+  applyMasterGain(getCurrentExtraDb())
+}
 
     async function stopAllAudio() {
   if (!audioContext) return
@@ -1084,7 +2395,16 @@ async function handleStopMusic() {
       updateLevelButtons()
     }
 function setGainMode(value) {
+  if (gainMode === value) return
+
+  endCurrentSession()  
   gainMode = value
+  currentSessionRecord = null
+  currentQuestionStartTime = null
+
+  totalQuestions = 0
+  correctAnswers = 0
+  updateScore()
   updateGainButtons()
 }
 
@@ -1099,6 +2419,8 @@ function updateGainButtons() {
 }
     async function selectMode(m) {
   if (!audioReady) return
+
+  endCurrentSession()
 
   await stopAllAudio()
 
@@ -1129,9 +2451,9 @@ if (gainArea) {
 
   if (mode === 1) {
     controlArea.innerHTML = `
-      <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
-      <button onclick="replaySine()">Replay</button>
-    `
+  <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+  <button onclick="replaySine()">Replay</button>
+`
   } else if (mode >= 2 && mode <= 4) {
     controlArea.innerHTML = `
       <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
@@ -1235,9 +2557,14 @@ async function handlePlayPink() {
   updateTransportButtons()
 }
     async function newQuestion() {
-      if (!await ensureAudioRunning()) return
+  if (!await ensureAudioRunning()) return
 
-      hasStarted = true
+  if (!currentSessionRecord) {
+    createNewSessionRecord()
+  }
+
+  hasStarted = true
+  currentQuestionStartTime = Date.now()
 
 const questionBtn = document.getElementById("questionBtn")
 if (questionBtn) {
@@ -1249,16 +2576,17 @@ if (questionBtn) {
 
       createContext()
 
-      const now = audioContext.currentTime
-      masterGain.gain.cancelScheduledValues(now)
-      masterGain.gain.setValueAtTime(volumeSlider.value / 10, now)
-
+const now = audioContext.currentTime
+applyMasterGain(0, true)
       feedbackImg.style.display = "none"
-      resultText.innerText = ""
-      questionAnswered = false
-      clearBands()
+resultText.innerText = ""
+answerResultMessage = ""
+questionAnswered = false
+clearBands()
+clearPreviewSelection()
 
-      currentFrequency = activeFreqs[Math.floor(Math.random() * activeFreqs.length)]
+const availableFreqs = activeFreqs.filter(freq => freq >= lowCutFreq)
+currentFrequency = availableFreqs[Math.floor(Math.random() * availableFreqs.length)]
 
       if (mode === 1) {
   await playSine(currentFrequency)
@@ -1288,10 +2616,7 @@ if (mode === 4) boostAmount = Math.random() > 0.5 ? gainMode : -gainMode
   filterNode.gain.value = eqState ? boostAmount : 0
 
   const compensationDb = getPinkCompensationDb()
-  const compensatedVolume =
-    (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
-
-  masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+applyMasterGain(compensationDb)
 
   sourceNode.connect(filterNode)
   filterNode.connect(masterGain)
@@ -1341,10 +2666,7 @@ sourceNode = createPinkNoise(audioContext)
       filterNode.gain.value = eqState ? boostAmount : 0
 
       const compensationDb = getPinkCompensationDb()
-      const compensatedVolume =
-        (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
-
-      masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+applyMasterGain(compensationDb)
 
       sourceNode.connect(filterNode)
       filterNode.connect(masterGain)
@@ -1374,10 +2696,7 @@ sourceNode = createPinkNoise(audioContext)
       filterNode.gain.value = eqState ? boostAmount : 0
 
       const compensationDb = getPinkCompensationDb()
-      const compensatedVolume =
-        (volumeSlider.value / 10) * Math.pow(10, compensationDb / 20)
-
-      masterGain.gain.setTargetAtTime(compensatedVolume, now, 0.02)
+applyMasterGain(compensationDb)
 
       sourceNode.connect(filterNode)
       filterNode.connect(masterGain)
@@ -1449,54 +2768,91 @@ updateEQSwitch()
     }
 
     async function checkAnswer(freq, element) {
-      if (!mode) return
+  if (!mode) return
 
-      if (mode === 1) {
-        await stopAllAudio()
-        await playSine(freq)
-      } else {
-        if (!await ensureAudioRunning()) return
-        if (audioContext) {
-  if (filterNode) {
-    filterNode.frequency.value = freq
-    filterNode.gain.value = eqState ? boostAmount : 0
-  }
-
-  if (musicFilterNode) {
-    musicFilterNode.frequency.value = freq
-    musicFilterNode.gain.value = eqState ? boostAmount : 0
-  }
-}
+  if (mode === 1) {
+    await stopAllAudio()
+    await playSine(freq)
+  } else {
+    if (!await ensureAudioRunning()) return
+    if (audioContext) {
+      if (filterNode) {
+        filterNode.frequency.value = freq
+        filterNode.gain.value = eqState ? boostAmount : 0
       }
 
-      if (!questionAnswered) {
-        totalQuestions++
-        clearBands()
-
-        if (freq === currentFrequency) {
-          correctAnswers++
-          element.classList.add("correct")
-          resultText.innerText = "Correct"
-          feedbackImg.src = "correct.png"
-          feedbackImg.style.display = "block"
-        } else {
-          element.classList.add("wrong")
-          highlightCorrect()
-          resultText.innerText = "Wrong (" + currentFrequency + "Hz)"
-          feedbackImg.src = "wrong.png"
-          feedbackImg.style.display = "block"
-        }
-
-        questionAnswered = true
-        updateScore()
+      if (musicFilterNode) {
+        musicFilterNode.frequency.value = freq
+        musicFilterNode.gain.value = eqState ? boostAmount : 0
       }
     }
+  }
+
+  if (!questionAnswered) {
+    totalQuestions++
+    clearBands()
+
+    const isCorrect = freq === currentFrequency
+    const responseTimeMs = currentQuestionStartTime ? (Date.now() - currentQuestionStartTime) : null
+
+    if (isCorrect) {
+      correctAnswers++
+      element.classList.add("correct")
+      answerResultMessage = "Correct"
+      resultText.innerText = answerResultMessage
+      feedbackImg.src = "correct.png"
+      feedbackImg.style.display = "block"
+    } else {
+      element.classList.add("wrong")
+      highlightCorrect()
+      answerResultMessage = "Wrong (" + formatFreqLabel(currentFrequency) + "Hz)"
+      resultText.innerText = answerResultMessage
+      feedbackImg.src = "wrong.png"
+      feedbackImg.style.display = "block"
+    }
+
+    if (currentSessionRecord) {
+      currentSessionRecord.questions.push({
+        questionNumber: totalQuestions,
+        mode: mode,
+        level: level,
+        gainMode: gainMode,
+        targetFrequency: currentFrequency,
+        selectedFrequency: freq,
+        isCorrect: isCorrect,
+        responseTimeMs: responseTimeMs,
+        answeredAt: new Date().toISOString()
+      })
+
+      currentSessionRecord.totalQuestions = totalQuestions
+      currentSessionRecord.correctAnswers = correctAnswers
+      currentSessionRecord.accuracy =
+        totalQuestions > 0
+          ? Math.round((correctAnswers / totalQuestions) * 100)
+          : 0
+    }
+
+    questionAnswered = true
+    updateScore()
+    console.log("currentSessionRecord:", currentSessionRecord)
+    return
+  }
+
+  markPreviewSelection(freq)
+
+  if (answerResultMessage) {
+  resultText.innerText = answerResultMessage + " | Preview: " + formatFreqLabel(freq) + "Hz"
+} else {
+  resultText.innerText = "Preview: " + formatFreqLabel(freq) + "Hz"
+}
+}
 
     function clearBands() {
-      document.querySelectorAll(".eq-band").forEach(b => {
-        b.classList.remove("correct", "wrong")
-      })
-    }
+  document.querySelectorAll(".eq-band").forEach(b => {
+    b.classList.remove("correct", "wrong", "preview-selected")
+  })
+  previewSelectedFreq = null
+}
 
     function highlightCorrect() {
       document.querySelectorAll(".eq-band").forEach(b => {
@@ -1580,16 +2936,45 @@ function toggleEQ() {
 }
 
     function updateScore() {
-      let percent = 0
+  const scoreEl = document.getElementById("score")
+  if (!scoreEl) return
 
-      if (totalQuestions > 0) {
-        percent = Math.round((correctAnswers / totalQuestions) * 100)
-      }
+  if (!currentSessionRecord || !Array.isArray(currentSessionRecord.questions)) {
+    scoreEl.innerText = "Score: 0 / 0 (0%)"
+    return
+  }
 
-      document.getElementById("score").innerText =
-        "Score: " + correctAnswers + " / " + totalQuestions + " (" + percent + "%)"
-    }
+  const questions = currentSessionRecord.questions
 
+  if (mode === 1) {
+    let total = questions.length
+    let correct = questions.filter(q => q.isCorrect).length
+    const percent = total > 0 ? Math.round((correct / total) * 100) : 0
+
+    scoreEl.innerText = `Score: ${correct} / ${total} (${percent}%)`
+    return
+  }
+
+  const easyQuestions = questions.filter(q => q.gainMode === 9)
+  const hardQuestions = questions.filter(q => q.gainMode === 6)
+
+  const easyCorrect = easyQuestions.filter(q => q.isCorrect).length
+  const hardCorrect = hardQuestions.filter(q => q.isCorrect).length
+
+  const easyPercent =
+    easyQuestions.length > 0
+      ? Math.round((easyCorrect / easyQuestions.length) * 100)
+      : 0
+
+  const hardPercent =
+    hardQuestions.length > 0
+      ? Math.round((hardCorrect / hardQuestions.length) * 100)
+      : 0
+
+  scoreEl.innerText =
+    `Easy: ${easyCorrect} / ${easyQuestions.length} (${easyPercent}%)\n` +
+    `Hard: ${hardCorrect} / ${hardQuestions.length} (${hardPercent}%)`
+}
     function getPinkCompensationDb() {
       if (mode === 2) return -1
       if (mode === 3) return 1
@@ -1633,20 +3018,79 @@ console.log(freq13)
       eqContainer.appendChild(band)
     })
 
+  function updateLowCutButtonState() {
+  const buttons = document.querySelectorAll(".eq-band")
+
+  buttons.forEach(btn => {
+    const freq = Number(btn.dataset.freq)
+
+    if (freq < lowCutFreq) {
+      btn.classList.add("disabled-lowcut")
+    } else {
+      btn.classList.remove("disabled-lowcut")
+    }
+  })
+}
+
     renderCharacterCards()
 updateBandDisplay()
 updateModeButtons()
 updateLevelButtons()
 updateGainButtons()
 updateScore()
+lowestFreqLabel.innerText = `Lowest Frequency: ${lowCutFreq} Hz`
+updateLowCutButtonState()
 resultText.innerText = "Choose a mode, then press Start."
 loadPlayerProfile()
 renderCharacterCards()
+updateDimButton()
+updateMuteButton()
+const statsFilterEl = document.getElementById("statsFilter")
+if (statsFilterEl) {
+  statsFilterEl.addEventListener("change", async () => {
+    await refreshStats()
+  })
+}
+const nicknameInputEl = document.getElementById("nicknameInput")
+if (nicknameInputEl) {
+  nicknameInputEl.addEventListener("input", async () => {
+    await refreshStats()
+  })
+}
+const statsFilter = document.getElementById("statsFilter")
+if (statsFilter) {
+  statsFilter.addEventListener("change", async () => {
+    await refreshStats()
+  })
+}
+console.log("saved history:", getSavedTrainingHistory())
     
     musicFileInput.addEventListener("change", async (e) => {
   const file = e.target.files[0]
   await handleMusicFileUpload(file)
 })
+
+window.addEventListener("beforeunload", () => {
+  endCurrentSession()
+})
+
+window.toggleDim = toggleDim
+window.toggleMute = toggleMute
+window.startTraining = startTraining
+window.selectCategory = selectCategory
+window.selectCharacter = selectCharacter
+window.selectMode = selectMode
+window.setLevel = setLevel
+window.setGainMode = setGainMode
+window.newQuestion = newQuestion
+window.replaySine = replaySine
+window.handleStopPink = handleStopPink
+window.handlePlayPink = handlePlayPink
+window.handleStopMusic = handleStopMusic
+window.handlePlayMusic = handlePlayMusic
+window.toggleEQ = toggleEQ
+window.openAnalysisModal = openAnalysisModal
+window.closeAnalysisModal = closeAnalysisModal
 
   </script>
 </body>
