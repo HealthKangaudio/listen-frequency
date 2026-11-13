@@ -6,8 +6,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
-
-
 .mute-emoji-btn:hover{
   background:transparent;
   box-shadow:none;
@@ -436,7 +434,7 @@ justify-content:center;
   background:#1b4332;
 }
 
-    .eq-toggle-wrap{
+.eq-toggle-wrap {
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -445,6 +443,33 @@ justify-content:center;
   vertical-align:middle;
   user-select:none;
 }
+
+.dry-wet-wrap {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:12px auto;
+  width: 100%;
+  max-width: 380px;
+  vertical-align:middle;
+  user-select:none;
+}
+
+.mix-label {
+  font-size:15px;
+  font-weight:700;
+  color:#1b4332;
+  min-width:40px;
+  text-align:center;
+}
+
+#fxMixSlider {
+  flex: 1;
+  cursor: pointer;
+  accent-color: #2d6a4f;
+}
+
 #volumeValue{
   display:inline-block;
   min-width:24px;
@@ -478,6 +503,29 @@ justify-content:center;
   color:#444;
   margin-bottom:8px;
   text-align:left;
+}
+
+/* Playbar CSS */
+#musicPlaybarWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 12px auto;
+    width: 90%;
+    max-width: 442px;
+}
+#musicPlaybar {
+    flex: 1;
+    cursor: pointer;
+    accent-color: #2d6a4f;
+}
+.time-display {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1b4332;
+    min-width: 38px;
+    text-align: center;
 }
 
 .eq-label{
@@ -687,7 +735,6 @@ button.inactive{
     inset 0 -1px 2px rgba(255,255,255,0.35);
 }
 
-/* active 상태에서는 hover 때도 거의 유지 */
 #volumeControlWrap .dim-circle-btn.active:hover{
   transform:translateY(4px);
   box-shadow:
@@ -785,6 +832,31 @@ button.inactive{
     .eq-container::-webkit-scrollbar-thumb:hover{
       background:#1b4332;
     }
+
+.fx-band, .noise-band {
+    width: 110px;
+    height: 70px;
+    background: linear-gradient(to top,#2d6a4f,#74c69d);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    box-sizing: border-box;
+    transition: all 0.16s ease;
+    margin: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+.fx-band:hover, .noise-band:hover {
+    background: linear-gradient(to top,#1b4332,#40916c);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
       
     .eq-band{
       width:42px;
@@ -942,6 +1014,12 @@ button.inactive{
         max-width:260px;
         max-height:220px;
       }
+
+      .fx-band, .noise-band {
+          width: 90px;
+          height: 60px;
+          font-size: 11px;
+      }
     }
 
     .analysis-modal{
@@ -1072,14 +1150,20 @@ button.inactive{
       <button class="mode-btn" data-mode="5" onclick="selectMode(5)">5. Music Boost</button>
       <button class="mode-btn" data-mode="6" onclick="selectMode(6)">6. Music Cut</button>
       <button class="mode-btn" data-mode="7" onclick="selectMode(7)">7. Music Random</button>
+
+      <div class="mode-row-break"></div>
+      
+      <button class="mode-btn" data-mode="8" onclick="selectMode(8)">8. FX Processing</button>
+      <button class="mode-btn" data-mode="9" onclick="selectMode(9)">9. Noise Types</button>
     </div>
     </div>
 
+ <div id="octaveArea">
  <h3>🎹 Octave</h3>
-
     <button class="octave-btn" data-level="1" onclick="setLevel(1)">1 Octave</button>
 <button class="octave-btn" data-level="2" onclick="setLevel(2)">2/3 Octave</button>
 <button class="octave-btn" data-level="3" onclick="setLevel(3)">1/3 Octave</button>
+</div>
 
 <div id="gainArea" style="display:none;">
 <h3>↕️ Gain</h3>
@@ -1105,6 +1189,12 @@ button.inactive{
   >
 
   <div id="musicFileName" style="margin-top:8px; font-size:14px; font-weight:600;"></div>
+  
+  <div id="musicPlaybarWrap" style="display:none;">
+    <span id="currentTimeDisplay" class="time-display">0:00</span>
+    <input type="range" id="musicPlaybar" min="0" max="100" step="0.1" value="0">
+    <span id="durationDisplay" class="time-display">0:00</span>
+  </div>
 </div>
 
     <br>
@@ -1128,6 +1218,9 @@ button.inactive{
 </div>
 
 <div class="eq-container" id="eqContainer"></div>
+<div class="eq-container" id="fxContainer" style="display:none; flex-wrap: wrap;"></div>
+<div class="eq-container" id="noiseContainer" style="display:none; flex-wrap: wrap;"></div>
+
     <div id="result"></div>
     <div id="score"></div>
 
@@ -1160,6 +1253,8 @@ button.inactive{
   <option value="mode_5">Music Boost</option>
   <option value="mode_6">Music Cut</option>
   <option value="mode_7">Music Random</option>
+  <option value="mode_8">FX Processing</option>
+  <option value="mode_9">Noise Types</option>
 </select>
       </div>
 
@@ -1191,6 +1286,38 @@ button.inactive{
   appId: "1:112161161530:web:d07774175b69729f96d003"
 };
 
+let playbarRaf = null;
+let musicStartTime = 0;
+let currentMusicOffset = 0;
+let currentFxMix = 1.0;
+
+function formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+function updatePlaybar() {
+    if (!pinkIsPlaying || !uploadedAudioBuffer || !audioContext) return;
+    const now = audioContext.currentTime;
+    let elapsed = (now - musicStartTime) % uploadedAudioBuffer.duration;
+    document.getElementById("currentTimeDisplay").innerText = formatTime(elapsed);
+    document.getElementById("musicPlaybar").value = (elapsed / uploadedAudioBuffer.duration) * 100;
+    playbarRaf = requestAnimationFrame(updatePlaybar);
+}
+
+document.getElementById("musicPlaybar").addEventListener("input", (e) => {
+    if (!uploadedAudioBuffer) return;
+    const percent = parseFloat(e.target.value);
+    currentMusicOffset = (percent / 100) * uploadedAudioBuffer.duration;
+    document.getElementById("currentTimeDisplay").innerText = formatTime(currentMusicOffset);
+    if (pinkIsPlaying) {
+        playUploadedMusic(currentMusicOffset);
+    }
+});
+
+
   function renderWrongFrequencyStats(records) {
   const wrongFreqList = document.getElementById("wrongFreqList")
   if (!wrongFreqList) return
@@ -1221,7 +1348,8 @@ button.inactive{
 
   wrongFreqList.innerHTML = sorted
     .map(([freq, count], index) => {
-      return `<div>${index + 1}. ${formatFreqLabel(Number(freq))}Hz — missed ${count} time${count > 1 ? "s" : ""}</div>`
+      const freqLabel = isNaN(freq) ? freq : formatFreqLabel(Number(freq)) + "Hz"
+      return `<div>${index + 1}. ${freqLabel} — missed ${count} time${count > 1 ? "s" : ""}</div>`
     })
     .join("")
 }
@@ -1254,27 +1382,31 @@ function getModeLabel(modeValue) {
     4: "Pink Random",
     5: "Music Boost",
     6: "Music Cut",
-    7: "Music Random"
+    7: "Music Random",
+    8: "FX Processing",
+    9: "Noise Types"
   }
   return modeMap[modeValue] || `Mode ${modeValue}`
 }
 
 function getModeColor(modeValue) {
   const colorMap = {
-    1: "#000000", // Sine Wave
-    2: "#ff69b4", // Pink Boost base
-    3: "#f59e0b", // Pink Cut base
-    4: "#a855f7", // Pink Random base
-    5: "#22c55e", // Music Boost base
-    6: "#3b82f6", // Music Cut base
-    7: "#8b4513"  // Music Random base
+    1: "#000000",
+    2: "#ff69b4",
+    3: "#f59e0b",
+    4: "#a855f7",
+    5: "#22c55e",
+    6: "#3b82f6",
+    7: "#8b4513",
+    8: "#f43f5e",
+    9: "#64748b"
   }
   return colorMap[modeValue] || "#444"
 }
 
 function getDifficultyLabel(record) {
   if (record.mode === 1) return "Sine"
-
+  if (record.mode === 8 || record.mode === 9) return "Normal"
   if (record.gainMode === 9) return "Easy"
   if (record.gainMode === 6) return "Hard"
 
@@ -1283,33 +1415,15 @@ function getDifficultyLabel(record) {
 
 function getDifficultyColor(modeValue, difficulty) {
   const colorMap = {
-    1: {
-      Sine: "#000000"
-    },
-    2: {
-      Easy: "#ffb6d9", // Pink Boost Easy - 연한 분홍
-      Hard: "#ff1493"  // Pink Boost Hard - 진한 분홍
-    },
-    3: {
-      Easy: "#ffd84d", // Pink Cut Easy - 노랑
-      Hard: "#ff8c00"  // Pink Cut Hard - 주황
-    },
-    4: {
-      Easy: "#d8b4fe", // Pink Random Easy - 연한 보라
-      Hard: "#7e22ce"  // Pink Random Hard - 진한 보라
-    },
-    5: {
-      Easy: "#86efac", // Music Boost Easy - 연한 녹색
-      Hard: "#15803d"  // Music Boost Hard - 진한 녹색
-    },
-    6: {
-      Easy: "#93c5fd", // Music Cut Easy - 연한 파랑
-      Hard: "#1d4ed8"  // Music Cut Hard - 진한 파랑
-    },
-    7: {
-      Easy: "#8b4513", // Music Random Easy - 갈색
-      Hard: "#8b0000"  // Music Random Hard - 진한 빨강
-    }
+    1: { Sine: "#000000" },
+    2: { Easy: "#ffb6d9", Hard: "#ff1493" },
+    3: { Easy: "#ffd84d", Hard: "#ff8c00" },
+    4: { Easy: "#d8b4fe", Hard: "#7e22ce" },
+    5: { Easy: "#86efac", Hard: "#15803d" },
+    6: { Easy: "#93c5fd", Hard: "#1d4ed8" },
+    7: { Easy: "#8b4513", Hard: "#8b0000" },
+    8: { Normal: "#f43f5e", Easy: "#f43f5e", Hard: "#be123c" },
+    9: { Normal: "#64748b", Easy: "#64748b", Hard: "#334155" }
   }
 
   return colorMap[modeValue]?.[difficulty] || getModeColor(modeValue)
@@ -1356,6 +1470,7 @@ function getQuestionDifficulty(question, record) {
   const resolvedGainMode = question?.gainMode ?? record?.gainMode
 
   if (record?.mode === 1) return "Sine"
+  if (record?.mode === 8 || record?.mode === 9) return "Normal"
   if (resolvedGainMode === 9) return "Easy"
   if (resolvedGainMode === 6) return "Hard"
 
@@ -1457,7 +1572,6 @@ function getSeriesStyle(modeValue, difficulty) {
     const dateKey = getRecordDateString(record)
     const questions = Array.isArray(record.questions) ? record.questions : []
 
-    // 특정 모드: Sine Wave
     if (filterValue === "mode_1") {
       if (record.mode !== 1) return
 
@@ -1480,7 +1594,6 @@ function getSeriesStyle(modeValue, difficulty) {
       return
     }
 
-    // All modes: Sine 포함 + 나머지 모드 Easy/Hard 분리
     if (filterValue === "allModes") {
       if (record.mode === 1) {
         if (questions.length > 0) {
@@ -1507,7 +1620,9 @@ function getSeriesStyle(modeValue, difficulty) {
           const difficulty = getQuestionDifficulty(question, record)
           if (!difficulty || difficulty === "Sine") return
 
-          const seriesKey = `${getModeLabel(record.mode)} · ${difficulty}`
+          let seriesKey = `${getModeLabel(record.mode)} · ${difficulty}`
+          if(record.mode === 8 || record.mode === 9) seriesKey = getModeLabel(record.mode)
+
           addStat(seriesKey, dateKey, 1, question.isCorrect ? 1 : 0)
         })
       } else {
@@ -1516,7 +1631,8 @@ function getSeriesStyle(modeValue, difficulty) {
 
         const total = Number(record.totalQuestions) || 0
         const correct = Number(record.correctAnswers) || 0
-        const seriesKey = `${getModeLabel(record.mode)} · ${difficulty}`
+        let seriesKey = `${getModeLabel(record.mode)} · ${difficulty}`
+        if(record.mode === 8 || record.mode === 9) seriesKey = getModeLabel(record.mode)
 
         addStat(seriesKey, dateKey, total, correct)
       }
@@ -1524,7 +1640,6 @@ function getSeriesStyle(modeValue, difficulty) {
       return
     }
 
-    // 특정 모드(2~7): Easy / Hard 분리
     const selectedMode = Number(filterValue.replace("mode_", ""))
     if (record.mode !== selectedMode) return
 
@@ -1597,7 +1712,10 @@ function getSeriesStyle(modeValue, difficulty) {
       { label: "Music Cut · Hard", mode: 6, difficulty: "Hard" },
 
       { label: "Music Random · Easy", mode: 7, difficulty: "Easy" },
-      { label: "Music Random · Hard", mode: 7, difficulty: "Hard" }
+      { label: "Music Random · Hard", mode: 7, difficulty: "Hard" },
+
+      { label: "FX Processing", mode: 8, difficulty: "Normal" },
+      { label: "Noise Types", mode: 9, difficulty: "Normal" }
     ]
 
     datasets = orderedSeries
@@ -1621,8 +1739,8 @@ function getSeriesStyle(modeValue, difficulty) {
   .filter(dataset => dataset.data.some(value => value !== null))
   } else {
     const selectedMode = Number(filterValue.replace("mode_", ""))
-
-    datasets = ["Easy", "Hard"]
+    const diffList = (selectedMode === 8 || selectedMode === 9) ? ["Normal"] : ["Easy", "Hard"]
+    datasets = diffList
   .map(difficulty => {
     return {
       label: difficulty,
@@ -1707,7 +1825,6 @@ growthChart = new Chart(canvas, {
   const totalQuestionsAll = Object.values(overallByDate).reduce((sum, stat) => sum + stat.total, 0)
   const totalCorrectAll = Object.values(overallByDate).reduce((sum, stat) => sum + stat.correct, 0)
 
-  // Best = 현재 보이는 시리즈들 중 최고 overall accuracy
   const visibleSeriesBestValues = Object.values(seriesTotals)
     .filter(stat => stat.total > 0)
     .map(stat => (stat.correct / stat.total) * 100)
@@ -1716,7 +1833,6 @@ growthChart = new Chart(canvas, {
     ? round1(Math.max(...visibleSeriesBestValues))
     : 0
 
-  // Average = correct / total 백분율
   const avg = totalQuestionsAll
     ? round1((totalCorrectAll / totalQuestionsAll) * 100)
     : 0
@@ -1824,22 +1940,12 @@ async function saveSessionToFirestore(sessionRecord) {
 
   try {
     const currentUid = auth.currentUser ? auth.currentUser.uid : null;
-
-    console.log("saving session:", {
-  nickname: sessionRecord.nickname,
-  category: sessionRecord.category,
-  character: sessionRecord.character,
-  uid: currentUid
-})
-
     await addDoc(collection(db, "trainingRecords"), {
       ...sessionRecord,
       uid: currentUid,
       createdAt: serverTimestamp()
     });
-
-    console.log("Firestore save success");
-await refreshStats();
+    await refreshStats();
   } catch (error) {
     console.error("Firestore save failed:", error);
   }
@@ -1888,14 +1994,13 @@ function endCurrentSession() {
   if (!finalized) return
 
   saveSessionToLocalHistory(finalized)
-  console.log("auto-saved session:", finalized)
 
   currentSessionRecord = null
   currentQuestionStartTime = null
 }
 
 function clearPreviewSelection() {
-  document.querySelectorAll(".eq-band").forEach(b => {
+  document.querySelectorAll(".eq-band, .fx-band, .noise-band").forEach(b => {
     b.classList.remove("preview-selected")
   })
   previewSelectedFreq = null
@@ -1904,8 +2009,8 @@ function clearPreviewSelection() {
 function markPreviewSelection(freq) {
   clearPreviewSelection()
 
-  document.querySelectorAll(".eq-band").forEach(b => {
-    if (parseFloat(b.dataset.freq) === freq) {
+  document.querySelectorAll(".eq-band, .fx-band, .noise-band").forEach(b => {
+    if (b.dataset.freq == freq) {
       if (!b.classList.contains("correct") && !b.classList.contains("wrong")) {
         b.classList.add("preview-selected")
       }
@@ -1960,6 +2065,8 @@ const lowestFreqLabel = document.getElementById("lowestFreqLabel")
 const dimBtn = document.getElementById("dimBtn")
 const muteBtn = document.getElementById("muteBtn")
     const eqContainer = document.getElementById("eqContainer")
+    const fxContainer = document.getElementById("fxContainer")
+    const noiseContainer = document.getElementById("noiseContainer")
     const resultText = document.getElementById("result")
     const controlArea = document.getElementById("controlArea")
     const feedbackImg = document.getElementById("feedbackImg")
@@ -1986,6 +2093,9 @@ const freq23 = [
 const freqOct = [31.5,63,125,250,500,1000,2000,4000,8000,16000]
 const LOW_FREQS = [20, 31.5, 40, 50, 63, 80, 100, 125, 160]
 
+const FX_TYPES = ["Distortion", "Phaser", "Flanger", "Chorus", "Vibrato", "Tremolo", "Compressor", "Slap delay", "Long Delay", "Room Reverb", "Plate Reverb", "Hall Reverb", "Gated Reverb", "HPF", "LPF", "Band Pass Filter", "Notch Filter"]
+const NOISE_TYPES = ["Hum", "Buzz", "Hiss", "Crackle noise", "Click noise"]
+
 let lowCutIndex = 0
 let lowCutFreq = LOW_FREQS[0]
 
@@ -2003,8 +2113,12 @@ let lowCutFreq = LOW_FREQS[0]
     let sineOsc = null
     let sineGain = null
     let musicSourceNode = null
+let preFXGain = null
 let musicGain = null
 let musicFilterNode = null
+
+let activeExtraNodes = [] 
+let mixObj = null
 
     let questionAnswered = false
     let answerResultMessage = ""
@@ -2052,11 +2166,8 @@ const db = getFirestore(app);
 
 try {
   await signInAnonymously(auth);
-  console.log("Firebase anonymous auth success");
   await refreshStats();
-} catch (error) {
-  console.error("Firebase anonymous auth failed:", error);
-}
+} catch (error) {}
 
 function getPlayerProfile() {
   return {
@@ -2120,9 +2231,7 @@ if (!playerCharacter) {
 
   try {
     webAudioOk = await initAudio()
-  } catch (err) {
-    console.error("initAudio failed:", err)
-  }
+  } catch (err) {}
 
   if (!webAudioOk) {
     introGuide.innerText = "Audio could not be started. Please try again."
@@ -2216,12 +2325,9 @@ function selectCharacter(characterId) {
         if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
           await audioContext.resume()
         }
-      } catch (e) {
-        console.error("Audio resume failed:", e)
-      }
+      } catch (e) { }
 
       audioReady = !!(audioContext && audioContext.state === "running")
-      console.log("audio state:", audioContext ? audioContext.state : "no context")
 
       return audioReady
     }
@@ -2239,9 +2345,7 @@ function selectCharacter(characterId) {
         source.start(0)
 
         audioReady = (audioContext.state === "running")
-        console.log("audio init ok:", audioContext.state)
       } catch (e) {
-        console.error("Audio init failed:", e)
         audioReady = false
       }
 
@@ -2304,8 +2408,17 @@ function toggleMute() {
   applyMasterGain(getCurrentExtraDb())
 }
 
+function cleanupExtraNodes() {
+    activeExtraNodes.forEach(node => {
+        try { if(node.stop) node.stop(); } catch(e){}
+        try { node.disconnect(); } catch(e){}
+    });
+    activeExtraNodes = [];
+}
+
     async function stopAllAudio() {
   if (!audioContext) return
+  if (playbarRaf) cancelAnimationFrame(playbarRaf);
 
   const oldSineGain = sineGain
   const oldSineOsc = sineOsc
@@ -2313,17 +2426,20 @@ function toggleMute() {
   const oldSourceNode = sourceNode
 
   const oldMusicSourceNode = musicSourceNode
+  const oldPreFXGain = preFXGain
   const oldMusicGain = musicGain
   const oldMusicFilterNode = musicFilterNode
-
+  
   sineGain = null
   sineOsc = null
   filterNode = null
   sourceNode = null
 
   musicSourceNode = null
+  preFXGain = null
   musicGain = null
   musicFilterNode = null
+  mixObj = null
 
   const now = audioContext.currentTime
   const fadeEnd = now + 0.03
@@ -2347,6 +2463,8 @@ function toggleMute() {
   if (oldMusicSourceNode) {
     try { oldMusicSourceNode.stop(now + 0.03) } catch (e) {}
   }
+  
+  cleanupExtraNodes();
 
   setTimeout(() => {
     if (oldSineGain) {
@@ -2359,6 +2477,9 @@ function toggleMute() {
       try { oldSourceNode.disconnect() } catch (e) {}
     }
 
+    if (oldPreFXGain) {
+      try { oldPreFXGain.disconnect() } catch (e) {}
+    }
     if (oldMusicGain) {
       try { oldMusicGain.disconnect() } catch (e) {}
     }
@@ -2371,12 +2492,13 @@ function toggleMute() {
   }, 80)
 }
 async function handlePlayMusic() {
-  await playUploadedMusic()
-  pinkIsPlaying = true
-  updateTransportButtons()
+  await playUploadedMusic(currentMusicOffset)
 }
 
 async function handleStopMusic() {
+  if (audioContext && musicStartTime > 0) {
+      currentMusicOffset = (audioContext.currentTime - musicStartTime) % uploadedAudioBuffer.duration;
+  }
   await stopAllAudio()
   pinkIsPlaying = false
   updateTransportButtons()
@@ -2417,22 +2539,50 @@ function updateGainButtons() {
     }
   })
 }
+
+function updateEQLabels() {
+    const labels = document.querySelectorAll('.eq-label');
+    if(labels.length < 2) return;
+    labels[0].innerText = "EQ OFF";
+    labels[1].innerText = "EQ ON";
+}
+
+function updateFXMix(val) {
+    currentFxMix = val / 100;
+    applyFXMix();
+}
+
+function applyFXMix() {
+    if (mode === 8 && mixObj) {
+        mixObj.wet.gain.value = mixObj.maxWet * currentFxMix;
+        mixObj.dry.gain.value = 1.0 - (1.0 - mixObj.maxDry) * currentFxMix;
+    }
+}
+
     async function selectMode(m) {
   if (!audioReady) return
 
   endCurrentSession()
-
   await stopAllAudio()
 
   mode = m
   hasStarted = false
 
   const gainArea = document.getElementById("gainArea")
-if (gainArea) {
-  gainArea.style.display = (mode === 1) ? "none" : "block"
-}
+  const octaveArea = document.getElementById("octaveArea")
+  const lowestFreqWrap = document.getElementById("lowestFreqWrap")
+  
+  if (gainArea) gainArea.style.display = (mode === 1 || mode === 8 || mode === 9) ? "none" : "block"
+  if (octaveArea) octaveArea.style.display = (mode === 8 || mode === 9) ? "none" : "block"
+  if (lowestFreqWrap) lowestFreqWrap.style.display = (mode >= 1 && mode <= 7) ? "flex" : "none"
+  
+  eqContainer.style.display = (mode >= 1 && mode <= 7) ? "flex" : "none"
+  fxContainer.style.display = (mode === 8) ? "flex" : "none"
+  noiseContainer.style.display = (mode === 9) ? "flex" : "none"
 
-  if (mode === 5 || mode === 6 || mode === 7) {
+  musicUploadArea.style.display = (mode >= 5 && mode <= 8) ? "block" : "none"
+
+  if (mode >= 5 && mode <= 8) {
   resultText.innerText = "Upload your track, then press Start."
 } else {
   resultText.innerText = "Choose a mode, then press Start."
@@ -2440,8 +2590,6 @@ if (gainArea) {
 
   questionAnswered = false
   clearBands()
-
-  musicUploadArea.style.display = (mode === 5 || mode === 6 || mode === 7) ? "block" : "none"
 
   correctAnswers = 0
   totalQuestions = 0
@@ -2470,60 +2618,527 @@ if (gainArea) {
     pinkIsPlaying = false
     eqState = false
     updateTransportButtons()
+    updateEQLabels()
     updateEQSwitch()
-  } else if (mode === 5 || mode === 6 || mode === 7) {
-    controlArea.innerHTML = `
-      <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
-      <button id="stopBtn" onclick="handleStopMusic()">⏹ Stop</button>
-      <button id="playBtn" onclick="handlePlayMusic()">▶ Play</button>
-      <div class="eq-toggle-wrap">
-        <span class="eq-label">EQ OFF</span>
-        <button id="eqSwitch" class="eq-switch" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="false" type="button">
-          <span class="eq-switch-knob"></span>
-        </button>
-        <span class="eq-label">EQ ON</span>
-      </div>
-    `
-    pinkIsPlaying = false
-    eqState = false
-    updateTransportButtons()
-    updateEQSwitch()
+  } else if (mode === 8) {
+      controlArea.innerHTML = `
+        <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+        <button id="stopBtn" onclick="handleStopMusic()">⏹ Stop</button>
+        <button id="playBtn" onclick="handlePlayMusic()">▶ Play</button>
+        <div class="dry-wet-wrap">
+          <span class="mix-label">DRY</span>
+          <input type="range" id="fxMixSlider" min="0" max="100" value="100" oninput="updateFXMix(this.value)">
+          <span class="mix-label">WET</span>
+        </div>
+      `
+      pinkIsPlaying = false
+      updateTransportButtons()
+  } else if (mode === 9) {
+      controlArea.innerHTML = `
+        <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+        <button id="stopBtn" onclick="handleStopPink()">⏹ Stop</button>
+        <button id="playBtn" onclick="handlePlayPink()">▶ Play</button>
+      `
+      pinkIsPlaying = false
+      updateTransportButtons()
+  } else {
+      controlArea.innerHTML = `
+        <button id="questionBtn" onclick="newQuestion()">${hasStarted ? "Next" : "Start"}</button>
+        <button id="stopBtn" onclick="handleStopMusic()">⏹ Stop</button>
+        <button id="playBtn" onclick="handlePlayMusic()">▶ Play</button>
+        <div class="eq-toggle-wrap">
+          <span class="eq-label">EQ OFF</span>
+          <button id="eqSwitch" class="eq-switch" onclick="toggleEQ()" aria-label="Toggle EQ" aria-pressed="false" type="button">
+            <span class="eq-switch-knob"></span>
+          </button>
+          <span class="eq-label">EQ ON</span>
+        </div>
+      `
+      pinkIsPlaying = false
+      eqState = false
+      updateTransportButtons()
+      updateEQLabels()
+      updateEQSwitch()
   }
 
   updateModeButtons()
 }
-async function playUploadedMusic() {
+
+
+function makeDistortionCurve(amount) {
+    let k = typeof amount === 'number' ? amount : 50;
+    let n_samples = 44100;
+    let curve = new Float32Array(n_samples);
+    let deg = Math.PI / 180;
+    for (let i = 0; i < n_samples; ++i ) {
+        let x = i * 2 / n_samples - 1;
+        curve[i] = ( 3 + k ) * x * 20 * deg / ( Math.PI + k * Math.abs(x) );
+    }
+    return curve;
+}
+
+function generateReverbIR(ctx, type) {
+    let sampleRate = ctx.sampleRate;
+    let length = 1.0, decay = 2.0;
+    let isGated = false;
+
+    if (type === 'Room Reverb') { length = 0.6; decay = 4.0; }
+    else if (type === 'Plate Reverb') { length = 2.5; decay = 2.0; }
+    else if (type === 'Hall Reverb') { length = 4.0; decay = 1.5; }
+    else if (type === 'Gated Reverb') { length = 0.45; decay = 0; isGated = true; }
+
+    let buffer = ctx.createBuffer(2, sampleRate * length, sampleRate);
+    for (let channel = 0; channel < 2; channel++) {
+        let channelData = buffer.getChannelData(channel);
+        for (let i = 0; i < buffer.length; i++) {
+            let t = i / sampleRate;
+            let noise = (Math.random() * 2 - 1);
+            
+            let env;
+            if (isGated) {
+                // Hold 100% for 300ms, then steep cutoff
+                env = (t < 0.30) ? 1.0 : (1.0 - (t - 0.30) / 0.1);
+                if (env < 0) env = 0;
+            } else {
+                env = Math.exp(-decay * t);
+            }
+            
+            channelData[i] = noise * env;
+        }
+    }
+    return buffer;
+}
+
+
+function buildEffect(type, ctx) {
+    let inputNode = ctx.createGain();
+    let outputNode = ctx.createGain();
+    let wetGain = ctx.createGain();
+    let dryGain = ctx.createGain();
+    
+    let maxWet = 1.0;
+    let maxDry = 1.0;
+
+    inputNode.connect(dryGain);
+    dryGain.connect(outputNode);
+    activeExtraNodes.push(inputNode, outputNode, wetGain, dryGain);
+    
+    if (type.includes('Reverb')) {
+        let convolver = ctx.createConvolver();
+        convolver.buffer = generateReverbIR(ctx, type);
+        
+        let filter = ctx.createBiquadFilter();
+        
+        if (type === 'Hall Reverb') {
+            filter.type = 'highshelf';
+            filter.frequency.value = 4000;
+            filter.gain.value = -3;
+            maxWet = 0.6; maxDry = 0.8;
+        } else if (type === 'Plate Reverb') {
+            filter.type = 'highshelf';
+            filter.frequency.value = 3000;
+            filter.gain.value = 3;
+            maxWet = 0.8; maxDry = 0.8;
+        } else if (type === 'Gated Reverb') {
+            filter.type = 'lowpass';
+            filter.frequency.value = 8000;
+            maxWet = 1.77; maxDry = 0.8;
+        } else if (type === 'Room Reverb') {
+            filter.type = 'lowpass';
+            filter.frequency.value = 8000;
+            maxWet = 0.85; maxDry = 0.8;
+        } else {
+            filter.type = 'lowpass';
+            filter.frequency.value = 8000;
+            maxWet = 0.6; maxDry = 0.8;
+        }
+
+        inputNode.connect(convolver);
+        convolver.connect(filter);
+        filter.connect(wetGain);
+        wetGain.connect(outputNode);
+        activeExtraNodes.push(convolver, filter);
+    }
+    else if (type === 'Slap delay' || type === 'Long Delay') {
+        let delay = ctx.createDelay(1.0);
+        let feedback = ctx.createGain();
+        let lpf = ctx.createBiquadFilter();
+        
+        if (type === 'Slap delay') {
+            delay.delayTime.value = 0.11; 
+            feedback.gain.value = 0.3; 
+            lpf.type = 'highshelf';
+            lpf.frequency.value = 3000;
+            lpf.gain.value = -6;
+            maxWet = 0.63; maxDry = 0.9;
+        } else {
+            delay.delayTime.value = 0.45; 
+            feedback.gain.value = 0.4;
+            lpf.type = 'lowpass';
+            lpf.frequency.value = 2500;
+            maxWet = 0.5; maxDry = 0.9;
+        }
+
+        inputNode.connect(delay);
+        delay.connect(lpf);
+        lpf.connect(feedback);
+        feedback.connect(delay);
+        delay.connect(wetGain);
+        wetGain.connect(outputNode);
+        activeExtraNodes.push(delay, feedback, lpf);
+    }
+    else if (type === 'Distortion') {
+        let shaper = ctx.createWaveShaper();
+        shaper.curve = makeDistortionCurve(100);
+        inputNode.connect(shaper);
+        shaper.connect(wetGain);
+        wetGain.connect(outputNode);
+        activeExtraNodes.push(shaper);
+        
+        maxWet = 0.19; maxDry = 0;
+    } 
+    else if (type === 'HPF' || type === 'LPF' || type === 'Band Pass Filter' || type === 'Notch Filter') {
+        let f1 = ctx.createBiquadFilter();
+        let f2 = null;
+        
+        if (type === 'HPF') {
+            f1.type = 'highpass'; 
+            f1.frequency.value = 500;
+        } else if (type === 'LPF') {
+            f1.type = 'lowpass'; 
+            f1.frequency.value = 10000;
+        } else if (type === 'Band Pass Filter') {
+            f1.type = 'highpass'; 
+            f1.frequency.value = 500;
+            f2 = ctx.createBiquadFilter();
+            f2.type = 'lowpass'; 
+            f2.frequency.value = 10000;
+        } else if (type === 'Notch Filter') {
+            f1.type = 'notch'; 
+            f1.frequency.value = 1000;
+            f1.Q.value = 20; 
+        }
+        
+        inputNode.connect(f1);
+        if (f2) {
+            f1.connect(f2);
+            f2.connect(wetGain);
+            activeExtraNodes.push(f1, f2);
+        } else {
+            f1.connect(wetGain);
+            activeExtraNodes.push(f1);
+        }
+        wetGain.connect(outputNode);
+        
+        maxWet = 0.56; maxDry = 0;
+    } 
+    else if (type === 'Compressor') {
+        let comp = ctx.createDynamicsCompressor();
+        comp.threshold.value = -30;
+        comp.ratio.value = 8;
+        comp.knee.value = 5;
+        comp.attack.value = 0.01;
+        comp.release.value = 0.2;
+        
+        let outGain = ctx.createGain();
+        outGain.gain.value = 0.5;
+
+        inputNode.connect(comp);
+        comp.connect(outGain);
+        outGain.connect(wetGain);
+        wetGain.connect(outputNode);
+        activeExtraNodes.push(comp, outGain);
+        
+        maxWet = 1.0; maxDry = 0;
+    }
+    else if (type === 'Tremolo') {
+        let tremoloGain = ctx.createGain();
+        let osc = ctx.createOscillator();
+        let modGain = ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.value = 1;
+        modGain.gain.value = 0.4;
+        
+        osc.connect(modGain);
+        modGain.connect(tremoloGain.gain);
+        
+        inputNode.connect(tremoloGain);
+        tremoloGain.connect(wetGain);
+        wetGain.connect(outputNode);
+        osc.start();
+        activeExtraNodes.push(tremoloGain, osc, modGain);
+        
+        maxWet = 1.4; maxDry = 0;
+    }
+    else if (type === 'Chorus' || type === 'Flanger' || type === 'Vibrato') {
+        let delay = ctx.createDelay();
+        let lfo = ctx.createOscillator();
+        let lfoGain = ctx.createGain();
+        let feedbackGain = ctx.createGain();
+        
+        if (type === 'Chorus') {
+            delay.delayTime.value = 0.005;
+            lfo.frequency.value = 1.5;
+            lfoGain.gain.value = 0.004;
+            feedbackGain.gain.value = 0;
+            maxWet = 0.7; maxDry = 0.7; 
+        } else if (type === 'Flanger') {
+            delay.delayTime.value = 0.005;
+            lfo.frequency.value = 0.5;
+            lfoGain.gain.value = 0.002;
+            feedbackGain.gain.value = 0.7;
+            maxWet = 0.6; maxDry = 0.7;
+        } else {
+            delay.delayTime.value = 0.02;
+            lfo.frequency.value = 1;
+            lfoGain.gain.value = 0.005;
+            feedbackGain.gain.value = 0;
+            maxWet = 1.0; maxDry = 0; 
+        }
+        
+        lfo.connect(lfoGain);
+        lfoGain.connect(delay.delayTime);
+        inputNode.connect(delay);
+        delay.connect(feedbackGain);
+        feedbackGain.connect(delay);
+        delay.connect(wetGain);
+        wetGain.connect(outputNode);
+        lfo.start();
+        activeExtraNodes.push(delay, lfo, lfoGain, feedbackGain);
+    }
+    else if (type === 'Phaser') {
+        let ap1 = ctx.createBiquadFilter(); ap1.type = 'allpass'; ap1.frequency.value = 1000;
+        let ap2 = ctx.createBiquadFilter(); ap2.type = 'allpass'; ap2.frequency.value = 1000;
+        let ap3 = ctx.createBiquadFilter(); ap3.type = 'allpass'; ap3.frequency.value = 1000;
+        
+        let lfo = ctx.createOscillator();
+        lfo.frequency.value = 0.5;
+        let lfoGain = ctx.createGain();
+        lfoGain.gain.value = 800;
+        
+        lfo.connect(lfoGain);
+        lfoGain.connect(ap1.frequency);
+        lfoGain.connect(ap2.frequency);
+        lfoGain.connect(ap3.frequency);
+        
+        inputNode.connect(ap1);
+        ap1.connect(ap2);
+        ap2.connect(ap3);
+        ap3.connect(wetGain);
+        wetGain.connect(outputNode);
+        
+        maxWet = 0.7; maxDry = 0.7;
+        
+        lfo.start();
+        activeExtraNodes.push(ap1, ap2, ap3, lfo, lfoGain);
+    }
+    
+    return { input: inputNode, output: outputNode, wet: wetGain, dry: dryGain, type: type, maxWet: maxWet, maxDry: maxDry };
+}
+
+function buildNoise(type, ctx) {
+    let outputNode = ctx.createGain();
+    
+    if (type === 'Hum') {
+        let osc1 = ctx.createOscillator(); osc1.frequency.value = 60;
+        let osc2 = ctx.createOscillator(); osc2.frequency.value = 120;
+        let humGain = ctx.createGain(); humGain.gain.value = 0.5;
+        osc1.connect(humGain);
+        osc2.connect(humGain);
+        humGain.connect(outputNode);
+        osc1.start(); osc2.start();
+        activeExtraNodes.push(osc1, osc2, humGain);
+    } 
+    else if (type === 'Buzz') {
+        let osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = 60;
+        let lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 1500;
+        let buzzGain = ctx.createGain(); buzzGain.gain.value = 0.3;
+        osc.connect(lpf);
+        lpf.connect(buzzGain);
+        buzzGain.connect(outputNode);
+        osc.start();
+        activeExtraNodes.push(osc, lpf, buzzGain);
+    }
+    else if (type === 'Hiss') {
+        let bufferSize = 4096;
+        let noiseScript = ctx.createScriptProcessor(bufferSize, 1, 1);
+        noiseScript.onaudioprocess = function(e) {
+            let out = e.outputBuffer.getChannelData(0);
+            for(let i=0; i<bufferSize; i++) out[i] = Math.random() * 2 - 1;
+        };
+        let hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 4000;
+        let hissGain = ctx.createGain(); hissGain.gain.value = 0.1;
+        noiseScript.connect(hpf);
+        hpf.connect(hissGain);
+        hissGain.connect(outputNode);
+        activeExtraNodes.push(noiseScript, hpf, hissGain);
+    }
+    else if (type === 'Crackle noise') {
+        let bufferSize = 4096;
+        let noiseScript = ctx.createScriptProcessor(bufferSize, 1, 1);
+        let lastOut = 0;
+        noiseScript.onaudioprocess = function(e) {
+            let out = e.outputBuffer.getChannelData(0);
+            for(let i=0; i<bufferSize; i++) {
+                if (Math.random() < 0.002) {
+                    lastOut = (Math.random() * 2 - 1) * 0.8; 
+                } else {
+                    lastOut *= 0.85; 
+                }
+                out[i] = lastOut + (Math.random() * 2 - 1) * 0.015; 
+            }
+        };
+        let lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 3500;
+        let crackleGain = ctx.createGain(); crackleGain.gain.value = 0.6;
+        noiseScript.connect(lpf); lpf.connect(crackleGain);
+        crackleGain.connect(outputNode);
+        activeExtraNodes.push(noiseScript, lpf, crackleGain);
+    }
+    else if (type === 'Click noise') {
+        let bufferSize = 4096;
+        let noiseScript = ctx.createScriptProcessor(bufferSize, 1, 1);
+        let clickCounter = 0;
+        let nextClick = Math.floor(Math.random() * 22050) + 10000;
+        noiseScript.onaudioprocess = function(e) {
+            let out = e.outputBuffer.getChannelData(0);
+            for(let i=0; i<bufferSize; i++) {
+                clickCounter++;
+                if (clickCounter >= nextClick) {
+                    out[i] = 1.0; 
+                    if(i+1 < bufferSize) out[i+1] = -0.5;
+                    if(i+2 < bufferSize) out[i+2] = 0.25;
+                    clickCounter = 0;
+                    nextClick = Math.floor(Math.random() * 22050) + 10000;
+                } else {
+                    out[i] = 0;
+                }
+            }
+        };
+        let hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 1000;
+        let clickGain = ctx.createGain(); clickGain.gain.value = 0.7;
+        noiseScript.connect(hpf); hpf.connect(clickGain);
+        clickGain.connect(outputNode);
+        activeExtraNodes.push(noiseScript, hpf, clickGain);
+    }
+    else if (type === 'EMI/RFI noise') {
+        let bufferSize = 4096;
+        let emiScript = ctx.createScriptProcessor(bufferSize, 1, 1);
+        let time = 0;
+        
+        emiScript.onaudioprocess = function(e) {
+            let out = e.outputBuffer.getChannelData(0);
+            let sr = ctx.sampleRate;
+            for(let i=0; i<bufferSize; i++) {
+                time += 1 / sr;
+                
+                let pulse = ((time * 480) % 1.0 < 0.1) ? 1.0 : -1.0; 
+                
+                let cycle = (time * 6) % 1.0; 
+                let env = 0;
+                if (cycle < 0.1) env = 1;
+                else if (cycle > 0.15 && cycle < 0.2) env = 1;
+                else if (cycle > 0.25 && cycle < 0.3) env = 1;
+
+                out[i] = pulse * env * (0.2 + 0.8 * Math.random());
+            }
+        };
+        
+        let hpf = ctx.createBiquadFilter();
+        hpf.type = 'highpass';
+        hpf.frequency.value = 6500;
+        
+        let emiGain = ctx.createGain(); 
+        emiGain.gain.value = 0.5;
+        
+        let whineOsc = ctx.createOscillator();
+        whineOsc.type = 'square';
+        whineOsc.frequency.value = 8200; 
+        
+        let whineGain = ctx.createGain();
+        whineGain.gain.value = 0.015;
+
+        let whineLfo = ctx.createOscillator();
+        whineLfo.type = 'sine';
+        whineLfo.frequency.value = 15; 
+        let whineLfoGain = ctx.createGain();
+        whineLfoGain.gain.value = 150; 
+
+        whineLfo.connect(whineLfoGain);
+        whineLfoGain.connect(whineOsc.frequency);
+        
+        whineOsc.connect(whineGain);
+        whineGain.connect(outputNode);
+
+        emiScript.connect(hpf);
+        hpf.connect(emiGain);
+        emiGain.connect(outputNode);
+        
+        whineOsc.start();
+        whineLfo.start();
+        
+        activeExtraNodes.push(emiScript, hpf, emiGain, whineOsc, whineGain, whineLfo, whineLfoGain);
+    }
+
+    return { output: outputNode };
+}
+
+
+async function playUploadedMusic(offset = 0, overrideFreq = null) {
   if (!uploadedAudioBuffer) {
     resultText.innerText = "Please upload an audio file first."
     return
   }
 
+  await stopAllAudio()
   createContext()
   await ensureAudioRunning()
-  await stopAllAudio()
 
   const now = audioContext.currentTime
 
   musicSourceNode = audioContext.createBufferSource()
   musicSourceNode.buffer = uploadedAudioBuffer
 
+  preFXGain = audioContext.createGain();
+  preFXGain.gain.setValueAtTime(1, now);
+  
   musicGain = audioContext.createGain()
   musicGain.gain.setValueAtTime(1, now)
+  
+  const freqToUse = overrideFreq || currentFrequency;
 
-  musicFilterNode = audioContext.createBiquadFilter()
-  musicFilterNode.type = "peaking"
-  musicFilterNode.frequency.value = currentFrequency || 1000
-  musicFilterNode.gain.value = eqState ? boostAmount : 0
+  musicSourceNode.connect(preFXGain);
 
-  if (level === 1) musicFilterNode.Q.value = 1.4
-  if (level === 2) musicFilterNode.Q.value = 2.1
-  if (level === 3) musicFilterNode.Q.value = 4.3
+  if (mode === 8) {
+      mixObj = buildEffect(freqToUse, audioContext);
+      preFXGain.connect(mixObj.input);
+      mixObj.output.connect(musicGain);
+      applyFXMix();
+  } 
+  else {
+      musicFilterNode = audioContext.createBiquadFilter()
+      musicFilterNode.type = "peaking"
+      musicFilterNode.frequency.value = freqToUse || 1000
+      musicFilterNode.gain.value = eqState ? boostAmount : 0
 
-  musicSourceNode.connect(musicFilterNode)
-  musicFilterNode.connect(musicGain)
+      if (level === 1) musicFilterNode.Q.value = 1.4
+      if (level === 2) musicFilterNode.Q.value = 2.1
+      if (level === 3) musicFilterNode.Q.value = 4.3
+
+      preFXGain.connect(musicFilterNode)
+      musicFilterNode.connect(musicGain)
+  }
+  
   musicGain.connect(masterGain)
-
-  musicSourceNode.start(now)
+  
+  let safeOffset = offset % uploadedAudioBuffer.duration;
+  musicSourceNode.start(now, safeOffset)
+  musicStartTime = now - safeOffset;
+  pinkIsPlaying = true;
+  
+  if(playbarRaf) cancelAnimationFrame(playbarRaf);
+  updatePlaybar();
+  updateTransportButtons();
 }
     async function handleMusicFileUpload(file) {
   if (!file) return
@@ -2538,6 +3153,12 @@ async function playUploadedMusic() {
     uploadedAudioBuffer = audioBuffer
     uploadedAudioName = file.name
     musicFileName.innerText = "Loaded: " + uploadedAudioName
+    
+    document.getElementById("durationDisplay").innerText = formatTime(audioBuffer.duration);
+    document.getElementById("musicPlaybarWrap").style.display = "flex";
+    currentMusicOffset = 0;
+    document.getElementById("musicPlaybar").value = 0;
+    
   } catch (err) {
     console.error("Audio file load failed:", err)
     uploadedAudioBuffer = null
@@ -2571,8 +3192,10 @@ if (questionBtn) {
   questionBtn.innerText = "Next"
 }
 
+if (mode >= 1 && mode <= 4) {
       await stopAllAudio()
       await sleep(70)
+}
 
       createContext()
 
@@ -2585,12 +3208,31 @@ questionAnswered = false
 clearBands()
 clearPreviewSelection()
 
-const availableFreqs = activeFreqs.filter(freq => freq >= lowCutFreq)
-currentFrequency = availableFreqs[Math.floor(Math.random() * availableFreqs.length)]
+if (mode === 8) {
+    currentFrequency = FX_TYPES[Math.floor(Math.random() * FX_TYPES.length)];
+    currentFxMix = 1.0;
+    const fxSlider = document.getElementById("fxMixSlider");
+    if (fxSlider) fxSlider.value = 100;
+} else if (mode === 9) {
+    currentFrequency = NOISE_TYPES[Math.floor(Math.random() * NOISE_TYPES.length)];
+} else {
+    const availableFreqs = activeFreqs.filter(freq => freq >= lowCutFreq)
+    currentFrequency = availableFreqs[Math.floor(Math.random() * availableFreqs.length)]
+}
 
       if (mode === 1) {
   await playSine(currentFrequency)
   return
+}
+
+if (mode === 9) {
+    await stopAllAudio()
+    await sleep(70)
+    pinkIsPlaying = true;
+    updateTransportButtons();
+    mixObj = buildNoise(currentFrequency, audioContext);
+    mixObj.output.connect(masterGain);
+    return;
 }
 
 if (mode >= 2 && mode <= 4) {
@@ -2623,22 +3265,25 @@ applyMasterGain(compensationDb)
   return
 }
 
-if (mode === 5 || mode === 6 || mode === 7) {
+if (mode >= 5 && mode <= 8) {
   if (!uploadedAudioBuffer) {
     resultText.innerText = "Please upload an audio file first."
     return
   }
 
   if (mode === 5) boostAmount = gainMode
-if (mode === 6) boostAmount = -gainMode
-if (mode === 7) boostAmount = Math.random() > 0.5 ? gainMode : -gainMode
+  if (mode === 6) boostAmount = -gainMode
+  if (mode === 7) boostAmount = Math.random() > 0.5 ? gainMode : -gainMode
 
   eqState = false
-  pinkIsPlaying = true
-  updateTransportButtons()
+  
+  let offsetToUse = currentMusicOffset;
+  if (pinkIsPlaying && audioContext && musicStartTime > 0) {
+      offsetToUse = (audioContext.currentTime - musicStartTime) % uploadedAudioBuffer.duration;
+  }
+  
   updateEQSwitch()
-
-  await playUploadedMusic()
+  await playUploadedMusic(offsetToUse)
   return
 }
 
@@ -2648,8 +3293,6 @@ updateEQSwitch()
 updateTransportButtons()
 
 sourceNode = createPinkNoise(audioContext)
-
-
 
       filterNode = audioContext.createBiquadFilter()
       filterNode.type = "peaking"
@@ -2681,7 +3324,13 @@ applyMasterGain(compensationDb)
 
       createContext()
 
-      const now = audioContext.currentTime
+      if (mode === 9) {
+          mixObj = buildNoise(currentFrequency, audioContext);
+          mixObj.output.connect(masterGain);
+          pinkIsPlaying = true;
+          updateTransportButtons();
+          return;
+      }
 
       sourceNode = createPinkNoise(audioContext)
 
@@ -2739,6 +3388,28 @@ updateEQSwitch()
       await stopAllAudio()
       await playSine(currentFrequency)
     }
+    
+    function changeEffectSeamlessly(freq) {
+        if (mode === 8) {
+            if (mixObj) {
+                preFXGain.disconnect(mixObj.input);
+                mixObj.output.disconnect();
+            }
+            cleanupExtraNodes();
+            mixObj = buildEffect(freq, audioContext);
+            preFXGain.connect(mixObj.input);
+            mixObj.output.connect(musicGain);
+            applyFXMix();
+        } else if (mode === 9) {
+            if (mixObj) {
+                mixObj.output.disconnect();
+            }
+            cleanupExtraNodes();
+            mixObj = buildNoise(freq, audioContext);
+            mixObj.output.connect(masterGain);
+        }
+    }
+
 
     function createPinkNoise(ctx) {
       const bufferSize = 4096
@@ -2773,26 +3444,13 @@ updateEQSwitch()
   if (mode === 1) {
     await stopAllAudio()
     await playSine(freq)
-  } else {
-    if (!await ensureAudioRunning()) return
-    if (audioContext) {
-      if (filterNode) {
-        filterNode.frequency.value = freq
-        filterNode.gain.value = eqState ? boostAmount : 0
-      }
-
-      if (musicFilterNode) {
-        musicFilterNode.frequency.value = freq
-        musicFilterNode.gain.value = eqState ? boostAmount : 0
-      }
-    }
   }
 
   if (!questionAnswered) {
     totalQuestions++
     clearBands()
 
-    const isCorrect = freq === currentFrequency
+    const isCorrect = freq == currentFrequency
     const responseTimeMs = currentQuestionStartTime ? (Date.now() - currentQuestionStartTime) : null
 
     if (isCorrect) {
@@ -2802,13 +3460,37 @@ updateEQSwitch()
       resultText.innerText = answerResultMessage
       feedbackImg.src = "correct.png"
       feedbackImg.style.display = "block"
+      
+      if (mode === 8 || mode === 9) {
+          // 정답 시 효과음 그대로 유지
+      } else {
+          if (!await ensureAudioRunning()) return
+          if (filterNode) filterNode.frequency.value = freq;
+          if (musicFilterNode) musicFilterNode.frequency.value = freq;
+      }
+      
     } else {
       element.classList.add("wrong")
       highlightCorrect()
-      answerResultMessage = "Wrong (" + formatFreqLabel(currentFrequency) + "Hz)"
+      let label = isNaN(currentFrequency) ? currentFrequency : formatFreqLabel(currentFrequency) + "Hz"
+      answerResultMessage = "Wrong (" + label + ")"
       resultText.innerText = answerResultMessage
       feedbackImg.src = "wrong.png"
       feedbackImg.style.display = "block"
+      
+      if (mode === 8 || mode === 9) {
+          changeEffectSeamlessly(freq)
+      } else {
+          if (!await ensureAudioRunning()) return
+          if (filterNode) {
+              filterNode.frequency.value = freq;
+              filterNode.gain.value = eqState ? boostAmount : 0;
+          }
+          if (musicFilterNode) {
+              musicFilterNode.frequency.value = freq;
+              musicFilterNode.gain.value = eqState ? boostAmount : 0;
+          }
+      }
     }
 
     if (currentSessionRecord) {
@@ -2834,29 +3516,36 @@ updateEQSwitch()
 
     questionAnswered = true
     updateScore()
-    console.log("currentSessionRecord:", currentSessionRecord)
     return
   }
 
   markPreviewSelection(freq)
 
+  let pLabel = isNaN(freq) ? freq : formatFreqLabel(freq) + "Hz"
   if (answerResultMessage) {
-  resultText.innerText = answerResultMessage + " | Preview: " + formatFreqLabel(freq) + "Hz"
-} else {
-  resultText.innerText = "Preview: " + formatFreqLabel(freq) + "Hz"
-}
+      resultText.innerText = answerResultMessage + " | Preview: " + pLabel
+  } else {
+      resultText.innerText = "Preview: " + pLabel
+  }
+  
+  if (mode === 8 || mode === 9) {
+      changeEffectSeamlessly(freq)
+  } else {
+      if (filterNode) filterNode.frequency.value = freq;
+      if (musicFilterNode) musicFilterNode.frequency.value = freq;
+  }
 }
 
     function clearBands() {
-  document.querySelectorAll(".eq-band").forEach(b => {
+  document.querySelectorAll(".eq-band, .fx-band, .noise-band").forEach(b => {
     b.classList.remove("correct", "wrong", "preview-selected")
   })
   previewSelectedFreq = null
 }
 
     function highlightCorrect() {
-      document.querySelectorAll(".eq-band").forEach(b => {
-        if (parseFloat(b.dataset.freq) === currentFrequency) {
+      document.querySelectorAll(".eq-band, .fx-band, .noise-band").forEach(b => {
+        if (b.dataset.freq == currentFrequency) {
           b.classList.add("correct")
         }
       })
@@ -2946,7 +3635,7 @@ function toggleEQ() {
 
   const questions = currentSessionRecord.questions
 
-  if (mode === 1) {
+  if (mode === 1 || mode === 8 || mode === 9) {
     let total = questions.length
     let correct = questions.filter(q => q.isCorrect).length
     const percent = total > 0 ? Math.round((correct / total) * 100) : 0
@@ -2992,10 +3681,8 @@ function toggleEQ() {
           if (audioContext.state === "suspended" || audioContext.state === "interrupted") {
             await audioContext.resume()
             audioReady = (audioContext.state === "running")
-            console.log("resumed after visibilitychange:", audioContext.state)
           }
         } catch (e) {
-          console.error("resume on visibilitychange failed:", e)
         }
       }
     })
@@ -3007,7 +3694,6 @@ function toggleEQ() {
   }
   return String(freq)
 }
-console.log(freq13)
 
     freq13.forEach(freq => {
       const band = document.createElement("div")
@@ -3016,6 +3702,24 @@ console.log(freq13)
       band.innerText = formatFreqLabel(freq)
       band.onclick = () => checkAnswer(freq, band)
       eqContainer.appendChild(band)
+    })
+    
+    FX_TYPES.forEach(fx => {
+      const band = document.createElement("div")
+      band.classList.add("fx-band")
+      band.dataset.freq = fx
+      band.innerText = fx
+      band.onclick = () => checkAnswer(fx, band)
+      fxContainer.appendChild(band)
+    })
+    
+    NOISE_TYPES.forEach(noise => {
+      const band = document.createElement("div")
+      band.classList.add("noise-band")
+      band.dataset.freq = noise
+      band.innerText = noise
+      band.onclick = () => checkAnswer(noise, band)
+      noiseContainer.appendChild(band)
     })
 
   function updateLowCutButtonState() {
@@ -3063,7 +3767,6 @@ if (statsFilter) {
     await refreshStats()
   })
 }
-console.log("saved history:", getSavedTrainingHistory())
     
     musicFileInput.addEventListener("change", async (e) => {
   const file = e.target.files[0]
@@ -3089,6 +3792,7 @@ window.handlePlayPink = handlePlayPink
 window.handleStopMusic = handleStopMusic
 window.handlePlayMusic = handlePlayMusic
 window.toggleEQ = toggleEQ
+window.updateFXMix = updateFXMix
 window.openAnalysisModal = openAnalysisModal
 window.closeAnalysisModal = closeAnalysisModal
 
